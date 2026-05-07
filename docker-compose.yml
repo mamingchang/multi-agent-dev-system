@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # 后端服务
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: multi-agent-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:////app/data/multi_agent_dev.db
+      - SECRET_KEY=docker-dev-secret-key-change-in-production
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8000
+      - FRONTEND_URL=http://localhost:3000
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-your_api_key_here}
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+      - ./backend:/app/backend
+    networks:
+      - multi-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 前端服务
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: multi-agent-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    networks:
+      - multi-agent-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # 数据库初始化服务（一次性运行）
+  db-init:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: multi-agent-db-init
+    command: python3 -c "from sqlalchemy import create_engine; from src.database.models import Base; engine = create_engine('sqlite:////app/data/multi_agent_dev.db'); Base.metadata.create_all(engine); print('Database initialized!')"
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    networks:
+      - multi-agent-network
+    restart: "no"
+
+networks:
+  multi-agent-network:
+    driver: bridge
+
+volumes:
+  data:
