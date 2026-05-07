@@ -24,12 +24,12 @@ class ProjectManager:
     PERMISSIONS = {
         UserRole.OWNER: {
             'create_session', 'delete_session', 'execute_task',
-            'add_member', 'remove_member', 'update_member_role',
+            'add_member', 'remove_member', 'update_member_role', 'manage_members',
             'update_project', 'delete_project', 'view_project'
         },
         UserRole.ADMIN: {
             'create_session', 'delete_session', 'execute_task',
-            'add_member', 'remove_member', 'update_member_role',
+            'add_member', 'remove_member', 'update_member_role', 'manage_members',
             'update_project', 'view_project'
         },
         UserRole.MEMBER: {

@@ -159,6 +159,7 @@ class Task(Base):
     session = relationship("Session", back_populates="tasks")
     events = relationship("TaskEvent", back_populates="task", cascade="all, delete-orphan")
     decisions = relationship("PendingDecision", back_populates="task", cascade="all, delete-orphan")
+    artifacts = relationship("Artifact", back_populates="task", cascade="all, delete-orphan")
 
     # 索引
     __table_args__ = (
@@ -227,3 +228,30 @@ class PendingDecision(Base):
 
     def __repr__(self):
         return f"<PendingDecision(id={self.id}, task_id='{self.task_id}', status={self.status.value})>"
+
+
+class Artifact(Base):
+    """任务产物表"""
+    __tablename__ = "artifacts"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    task_id = Column(String(36), ForeignKey("tasks.id"), nullable=False)
+    artifact_type = Column(String(50), nullable=False)  # 'code', 'document', 'test', 'config'
+    name = Column(String(200), nullable=False)
+    content = Column(Text, nullable=True)
+    metadata = Column(JSON, default=dict)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    # 关系
+    task = relationship("Task", back_populates="artifacts")
+    creator = relationship("User")
+
+    # 索引
+    __table_args__ = (
+        Index('idx_artifact_task', 'task_id'),
+        Index('idx_artifact_type', 'artifact_type'),
+    )
+
+    def __repr__(self):
+        return f"<Artifact(id={self.id}, name='{self.name}', type={self.artifact_type})>"
