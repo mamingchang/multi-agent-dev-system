@@ -1,0 +1,47 @@
+# Agent Configuration
+# 各个Agent的配置参数
+
+agents:
+  requester:
+    name: "Requester"
+    default_priority: "medium"
+
+  product_manager:
+    name: "ProductManager"
+    prd_template: "standard"
+
+  architect:
+    name: "Architect"
+    default_tech_stack:
+      backend: "Python/FastAPI"
+      frontend: "React"
+      database: "PostgreSQL"
+
+  developer:
+    name: "Developer"
+    coding_standards: "PEP8"
+
+  code_reviewer:
+    name: "CodeReviewer"
+    review_checklist:
+      - "代码风格"
+      - "安全性"
+      - "性能"
+      - "可维护性"
+
+  tester:
+    name: "Tester"
+    test_types:
+      - "unit"
+      - "integration"
+      - "e2e"
+
+  devops:
+    name: "DevOps"
+    environment: "production"
+    deployment_strategy: "rolling"
+
+workflow:
+  max_iterations: 10
+  enable_feedback_loop: true
+  auto_retry: true
