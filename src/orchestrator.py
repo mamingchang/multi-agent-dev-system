@@ -12,15 +12,18 @@ from .agents.code_reviewer import CodeReviewerAgent
 from .agents.tester import TesterAgent
 from .agents.devops import DevOpsAgent
 from .workflow.task import Task, TaskStatus
+from .session_manager import SessionManager, Session
 
 
 class Orchestrator:
     """协调器"""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Dict[str, Any] = None, session_manager: SessionManager = None):
         self.config = config or {}
         self.agents: Dict[str, BaseAgent] = {}
         self.max_iterations = self.config.get('max_iterations', 10)
+        self.session_manager = session_manager
+        self.current_session: Optional[Session] = None
         self._initialize_agents()
 
     def _initialize_agents(self) -> None:
@@ -35,18 +38,27 @@ class Orchestrator:
             'DevOps': DevOpsAgent(config={'environment': 'production'})
         }
 
-    def execute_workflow(self, task: Task) -> Dict[str, Any]:
+    def execute_workflow(self, task: Task, session: Session = None, auto_save: bool = True) -> Dict[str, Any]:
         """
         执行完整工作流
 
         Args:
             task: 任务对象
+            session: 会话对象（可选）
+            auto_save: 是否自动保存会话
 
         Returns:
             执行结果
         """
+        # 如果提供了session，将任务添加到session
+        if session:
+            self.current_session = session
+            session.add_task(task)
+
         print("=" * 80)
         print(f"开始执行工作流: {task.title}")
+        if session:
+            print(f"会话ID: {session.session_id}")
         print("=" * 80)
 
         # 工作流顺序
@@ -75,6 +87,10 @@ class Orchestrator:
             try:
                 result = agent.process(task)
 
+                # 自动保存会话
+                if auto_save and session and self.session_manager:
+                    self.session_manager.save_session(session)
+
                 if result['success']:
                     print(f"\n✓ {agent_name} 处理成功: {result['message']}")
                     current_step += 1
@@ -92,6 +108,11 @@ class Orchestrator:
 
         # 检查是否完成
         if task.status == TaskStatus.COMPLETED:
+            if session:
+                session.status = "completed"
+                if self.session_manager:
+                    self.session_manager.save_session(session)
+
             print("\n" + "=" * 80)
             print("🎉 工作流执行成功!")
             print("=" * 80)
@@ -99,16 +120,23 @@ class Orchestrator:
             return {
                 'success': True,
                 'message': '工作流执行成功',
-                'task': task.to_dict()
+                'task': task.to_dict(),
+                'session_id': session.session_id if session else None
             }
         else:
+            if session:
+                session.status = "failed"
+                if self.session_manager:
+                    self.session_manager.save_session(session)
+
             print("\n" + "=" * 80)
             print("⚠️  工作流未完成")
             print("=" * 80)
             return {
                 'success': False,
                 'message': f'工作流在{iteration}轮后未完成',
-                'task': task.to_dict()
+                'task': task.to_dict(),
+                'session_id': session.session_id if session else None
             }
 
     def _print_summary(self, task: Task) -> None:

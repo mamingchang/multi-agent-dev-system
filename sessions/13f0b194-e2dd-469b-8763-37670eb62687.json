@@ -1,0 +1,262 @@
+{
+  "session_id": "13f0b194-e2dd-469b-8763-37670eb62687",
+  "user_id": "user_001",
+  "created_at": "2026-05-07T11:40:05.056111",
+  "updated_at": "2026-05-07T11:40:05.064500",
+  "status": "active",
+  "metadata": {},
+  "tasks": {
+    "TASK-001": {
+      "task_id": "TASK-001",
+      "title": "开发用户管理系统",
+      "description": "需要一个用户管理系统，支持用户注册、登录、权限管理等功能",
+      "status": "in_testing",
+      "created_at": "2026-05-07T11:40:05.056142",
+      "updated_at": "2026-05-07T11:40:05.062880",
+      "current_agent": "Tester",
+      "artifacts": {
+        "raw_requirement": {
+          "content": {
+            "title": "开发用户管理系统",
+            "description": "需要一个用户管理系统，支持用户注册、登录、权限管理等功能",
+            "priority": "medium"
+          },
+          "created_by": "Requester",
+          "created_at": "2026-05-07T11:40:05.056156"
+        },
+        "prd": {
+          "content": {
+            "title": "开发用户管理系统",
+            "background": "基于需求: 需要一个用户管理系统，支持用户注册、登录、权限管理等功能",
+            "user_stories": [
+              "作为用户，我希望能够...",
+              "作为管理员，我需要..."
+            ],
+            "functional_requirements": [
+              "系统应该支持...",
+              "界面需要展示..."
+            ],
+            "non_functional_requirements": {
+              "performance": "响应时间<200ms",
+              "security": "需要身份验证",
+              "scalability": "支持1000并发用户"
+            },
+            "acceptance_criteria": [
+              "功能正常运行",
+              "通过所有测试用例"
+            ]
+          },
+          "created_by": "ProductManager",
+          "created_at": "2026-05-07T11:40:05.056346"
+        },
+        "architecture": {
+          "content": {
+            "tech_stack": {
+              "backend": "Python/FastAPI",
+              "frontend": "React",
+              "database": "PostgreSQL",
+              "cache": "Redis"
+            },
+            "system_design": {
+              "architecture_pattern": "Microservices",
+              "components": [
+                "API Gateway",
+                "User Service",
+                "Business Logic Service",
+                "Data Service"
+              ],
+              "communication": "REST API + Message Queue"
+            },
+            "database_schema": {
+              "tables": [
+                "users",
+                "orders",
+                "products"
+              ],
+              "relationships": "One-to-Many, Many-to-Many"
+            },
+            "api_design": {
+              "endpoints": [
+                "POST /api/v1/users",
+                "GET /api/v1/users/{id}",
+                "PUT /api/v1/users/{id}"
+              ]
+            },
+            "security": {
+              "authentication": "JWT",
+              "authorization": "RBAC",
+              "encryption": "TLS 1.3"
+            }
+          },
+          "created_by": "Architect",
+          "created_at": "2026-05-07T11:40:05.056658"
+        },
+        "code": {
+          "content": {
+            "files": [
+              {
+                "path": "src/main.py",
+                "content": "# Main application entry\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get(\"/\")\ndef read_root():\n    return {\"message\": \"Hello World\"}",
+                "lines": 50
+              },
+              {
+                "path": "src/models.py",
+                "content": "# Database models\nfrom sqlalchemy import Column, Integer, String\n\nclass User(Base):\n    id = Column(Integer, primary_key=True)\n    name = Column(String)",
+                "lines": 30
+              },
+              {
+                "path": "src/api.py",
+                "content": "# API endpoints\nfrom fastapi import APIRouter\n\nrouter = APIRouter()\n\n@router.post(\"/users\")\ndef create_user():\n    pass",
+                "lines": 40
+              }
+            ],
+            "total_lines": 120,
+            "test_coverage": 76,
+            "complexity": "medium"
+          },
+          "created_by": "Developer",
+          "created_at": "2026-05-07T11:40:05.061812"
+        },
+        "code_review": {
+          "content": {
+            "overall_quality": "excellent",
+            "code_style": "PEP8 compliant",
+            "security_issues": 0,
+            "issues": [],
+            "suggestions": [],
+            "approved": true
+          },
+          "created_by": "CodeReviewer",
+          "created_at": "2026-05-07T11:40:05.062391"
+        },
+        "test_result": {
+          "content": {
+            "total_tests": 5,
+            "passed": 5,
+            "failed": 0,
+            "test_cases": [
+              {
+                "name": "用户注册测试",
+                "status": "passed"
+              },
+              {
+                "name": "用户登录测试",
+                "status": "passed"
+              },
+              {
+                "name": "数据查询测试",
+                "status": "passed"
+              },
+              {
+                "name": "权限验证测试",
+                "status": "passed"
+              },
+              {
+                "name": "性能测试",
+                "status": "passed"
+              }
+            ],
+            "coverage": 76,
+            "bugs_found": 0,
+            "all_passed": true
+          },
+          "created_by": "Tester",
+          "created_at": "2026-05-07T11:40:05.062869"
+        }
+      },
+      "feedback": [
+        {
+          "from": "Architect",
+          "to": "Developer",
+          "content": "请确认技术方案的可行性",
+          "type": "question",
+          "timestamp": "2026-05-07T11:40:05.056673"
+        },
+        {
+          "from": "Developer",
+          "to": "Architect",
+          "content": "技术方案可行，已完成实现",
+          "type": "approval",
+          "timestamp": "2026-05-07T11:40:05.057363"
+        },
+        {
+          "from": "CodeReviewer",
+          "to": "Developer",
+          "content": "代码质量良好，审查通过",
+          "type": "approval",
+          "timestamp": "2026-05-07T11:40:05.057923"
+        },
+        {
+          "from": "Tester",
+          "to": "Developer",
+          "content": "发现1个测试失败: ['数据查询测试']",
+          "type": "rejection",
+          "timestamp": "2026-05-07T11:40:05.058490"
+        },
+        {
+          "from": "Developer",
+          "to": "Architect",
+          "content": "技术方案可行，已完成实现",
+          "type": "approval",
+          "timestamp": "2026-05-07T11:40:05.058881"
+        },
+        {
+          "from": "CodeReviewer",
+          "to": "Developer",
+          "content": "代码质量良好，审查通过",
+          "type": "approval",
+          "timestamp": "2026-05-07T11:40:05.059314"
+        },
+        {
+          "from": "Tester",
+          "to": "Developer",
+          "content": "发现1个测试失败: ['数据查询测试']",
+          "type": "rejection",
+          "timestamp": "2026-05-07T11:40:05.059762"
+        },
+        {
+          "from": "Developer",
+          "to": "Architect",
+          "content": "技术方案可行，已完成实现",
+          "type": "approval",
+          "timestamp": "2026-05-07T11:40:05.060285"
+        },
+        {
+          "from": "CodeReviewer",
+          "to": "Developer",
+          "content": "代码质量良好，审查通过",
+          "type": "approval",
+          "timestamp": "2026-05-07T11:40:05.060783"
+        },
+        {
+          "from": "Tester",
+          "to": "Developer",
+          "content": "发现2个测试失败: ['数据查询测试', '性能测试']",
+          "type": "rejection",
+          "timestamp": "2026-05-07T11:40:05.061282"
+        },
+        {
+          "from": "Developer",
+          "to": "Architect",
+          "content": "技术方案可行，已完成实现",
+          "type": "approval",
+          "timestamp": "2026-05-07T11:40:05.061821"
+        },
+        {
+          "from": "CodeReviewer",
+          "to": "Developer",
+          "content": "代码质量良好，审查通过",
+          "type": "approval",
+          "timestamp": "2026-05-07T11:40:05.062401"
+        },
+        {
+          "from": "Tester",
+          "to": "Developer",
+          "content": "所有测试通过",
+          "type": "approval",
+          "timestamp": "2026-05-07T11:40:05.062878"
+        }
+      ]
+    }
+  }
+}
