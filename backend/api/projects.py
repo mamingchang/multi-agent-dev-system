@@ -5,25 +5,26 @@ Projects API
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 from src.database.models import UserRole
 from src.project_manager import ProjectManager, PermissionError
 from ..dependencies import get_db, get_current_user, get_project_manager, check_project_permission
+from ..security import sanitize_html
 
 router = APIRouter(prefix="/api/projects", tags=["Projects"])
 
 
 # Pydantic模型
 class ProjectCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=1000)
 
 
 class ProjectUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=1000)
 
 
 class ProjectResponse(BaseModel):
@@ -87,9 +88,13 @@ async def create_project(
     Returns:
         创建的项目
     """
+    # 清理HTML防止XSS
+    clean_name = sanitize_html(project_data.name)
+    clean_description = sanitize_html(project_data.description) if project_data.description else None
+
     project = project_manager.create_project(
-        name=project_data.name,
-        description=project_data.description,
+        name=clean_name,
+        description=clean_description,
         created_by=current_user["id"]
     )
 

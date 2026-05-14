@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from passlib.context import CryptContext
 from jose import jwt
 
@@ -23,10 +23,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Pydantic模型
 class UserRegister(BaseModel):
-    username: str
+    username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
-    password: str
-    full_name: Optional[str] = None
+    password: str = Field(..., min_length=8, max_length=100)
+    full_name: Optional[str] = Field(None, max_length=100)
 
 
 class UserResponse(BaseModel):
@@ -142,7 +142,7 @@ async def login(
         )
 
     # 创建token
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": str(user.id)})
 
     return {
         "access_token": access_token,
