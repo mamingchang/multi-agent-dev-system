@@ -1,0 +1,72 @@
+# LLM配置文件
+# 为每个Agent配置使用哪个LLM
+
+# 默认配置
+# 如果Agent没有单独配置，使用这个默认配置
+default:
+  provider: "claude"
+  model: "claude-3-sonnet-20240229"
+  temperature: 0.7
+  max_tokens: 4096
+  timeout: 60
+  # 自定义API端点（可选）
+  # 如果使用代理或兼容服务，在这里配置
+  api_base: "${ANTHROPIC_API_BASE:}"  # 从环境变量读取，默认为空（使用官方API）
+
+# 每个Agent的单独配置
+# 可以为不同Agent配置不同的LLM，实现成本优化
+agents:
+  # 需求分析Agent - 需要理解能力强的模型
+  Requester:
+    provider: "claude"
+    model: "claude-3-sonnet-20240229"
+    temperature: 0.7
+    max_tokens: 2048
+
+  # 产品经理Agent - 需要创造力
+  ProductManager:
+    provider: "claude"
+    model: "claude-3-sonnet-20240229"
+    temperature: 0.8  # 稍高的温度，更有创造力
+    max_tokens: 4096
+
+  # 架构师Agent - 需要逻辑严谨
+  Architect:
+    provider: "claude"
+    model: "claude-3-sonnet-20240229"
+    temperature: 0.5  # 较低的温度，更严谨
+    max_tokens: 4096
+
+  # 开发者Agent - 需要代码能力强
+  Developer:
+    provider: "claude"
+    model: "claude-3-sonnet-20240229"
+    temperature: 0.3  # 低温度，代码更准确
+    max_tokens: 8192  # 更多token，因为要生成代码
+
+  # 代码审查Agent - 需要严格
+  CodeReviewer:
+    provider: "claude"
+    model: "claude-3-sonnet-20240229"
+    temperature: 0.3
+    max_tokens: 4096
+
+  # 测试Agent - 可以用便宜的模型
+  Tester:
+    provider: "openai"  # 示例：用OpenAI
+    model: "gpt-3.5-turbo"
+    temperature: 0.5
+    max_tokens: 4096
+
+  # DevOps Agent - 简单任务，用便宜的模型
+  DevOps:
+    provider: "openai"
+    model: "gpt-3.5-turbo"
+    temperature: 0.5
+    max_tokens: 2048
+
+# API密钥配置
+# 注意：实际使用时应该从环境变量读取，不要直接写在配置文件中
+api_keys:
+  claude: "${ANTHROPIC_API_KEY}"  # 从环境变量读取
+  openai: "${OPENAI_API_KEY}"     # 从环境变量读取

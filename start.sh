@@ -41,10 +41,8 @@ fi
 
 # 启动后端（后台）
 echo "启动后端服务..."
-cd backend
-python3 -m uvicorn main:app --reload --host 0.0.0.0 --port 8000 > ../backend.log 2>&1 &
+python3 -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000 > backend.log 2>&1 &
 BACKEND_PID=$!
-cd ..
 echo "✓ 后端已启动 (PID: $BACKEND_PID)"
 echo "  日志: backend.log"
 echo ""

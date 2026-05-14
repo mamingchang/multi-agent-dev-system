@@ -36,41 +36,47 @@ apiClient.interceptors.response.use(
 
 // 认证API
 export const authAPI = {
-  register: (data) => apiClient.post('/api/auth/register', data),
+  register: (data) => apiClient.post('/auth/register', data),
   login: (username, password) => {
-    const formData = new FormData();
-    formData.append('username', username);
-    formData.append('password', password);
-    return apiClient.post('/api/auth/login', formData, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
+    return apiClient.post('/auth/login', { username, password });
   },
-  getCurrentUser: () => apiClient.get('/api/auth/me'),
+  getCurrentUser: () => apiClient.get('/auth/me'),
 };
 
 // 项目API
 export const projectsAPI = {
-  list: () => apiClient.get('/api/projects'),
-  create: (data) => apiClient.post('/api/projects', data),
-  get: (id) => apiClient.get(`/api/projects/${id}`),
-  update: (id, data) => apiClient.put(`/api/projects/${id}`, data),
-  delete: (id) => apiClient.delete(`/api/projects/${id}`),
-  getMembers: (id) => apiClient.get(`/api/projects/${id}/members`),
-  addMember: (id, data) => apiClient.post(`/api/projects/${id}/members`, data),
-  removeMember: (id, userId) => apiClient.delete(`/api/projects/${id}/members/${userId}`),
-  updateMemberRole: (id, userId, role) => apiClient.put(`/api/projects/${id}/members/${userId}`, { role }),
-  getStats: (id) => apiClient.get(`/api/projects/${id}/stats`),
+  list: () => apiClient.get('/projects'),
+  create: (data) => apiClient.post('/projects', data),
+  get: (id) => apiClient.get(`/projects/${id}`),
+  update: (id, data) => apiClient.put(`/projects/${id}`, data),
+  delete: (id) => apiClient.delete(`/projects/${id}`),
+  getMembers: (id) => apiClient.get(`/projects/${id}/members`),
+  addMember: (id, data) => apiClient.post(`/projects/${id}/members`, data),
+  removeMember: (id, userId) => apiClient.delete(`/projects/${id}/members/${userId}`),
+  updateMemberRole: (id, userId, role) => apiClient.put(`/projects/${id}/members/${userId}`, { role }),
+  getStats: (id) => apiClient.get(`/projects/${id}/stats`),
+};
+
+// 组织API
+export const organizationsAPI = {
+  list: () => apiClient.get('/organizations'),
+  create: (data) => apiClient.post('/organizations', data),
+  get: (id) => apiClient.get(`/organizations/${id}`),
 };
 
 // 决策API
 export const decisionsAPI = {
-  getPending: () => apiClient.get('/api/decisions/pending'),
-  resolve: (id, response) => apiClient.post(`/api/decisions/${id}/resolve`, response),
+  getPending: () => apiClient.get('/decisions/pending'),
+  resolve: (id, response) => apiClient.post(`/decisions/${id}/resolve`, response),
 };
 
 // 任务API
 export const tasksAPI = {
-  getTimeline: (id) => apiClient.get(`/api/tasks/${id}/timeline`),
+  get: (id) => apiClient.get(`/workflow/tasks/${id}`),
+  getTimeline: (id) => apiClient.get(`/tasks/${id}/timeline`),
+  getEvents: (id) => apiClient.get(`/workflow/tasks/${id}/events`),
+  getArtifacts: (id) => apiClient.get(`/workflow/tasks/${id}/artifacts`),
+  execute: (id, data) => apiClient.post(`/workflow/tasks/${id}/execute`, data),
 };
 
 export default apiClient;

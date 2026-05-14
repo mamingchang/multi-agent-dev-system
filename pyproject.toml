@@ -1,0 +1,58 @@
+[tool.pytest.ini_options]
+# pytest配置文件 - 配置测试框架、覆盖率、插件等
+# 测试目录
+testpaths = ["tests"]
+
+# 测试文件模式
+python_files = ["test_*.py", "*_test.py"]
+
+# 测试类模式
+python_classes = ["Test*"]
+
+# 测试函数模式
+python_functions = ["test_*"]
+
+# 输出选项
+addopts = [
+    "-v",                           # 详细输出
+    "--strict-markers",             # 严格标记模式
+    "--tb=short",                   # 简短的traceback
+    "--cov=src",                    # 覆盖率检查src目录
+    "--cov-report=html",            # HTML覆盖率报告
+    "--cov-report=term-missing",    # 终端显示缺失行
+    "--cov-fail-under=90",          # 覆盖率低于90%失败
+]
+
+# 标记定义
+markers = [
+    "unit: 单元测试",
+    "integration: 集成测试",
+    "stress: 压力测试",
+    "slow: 慢速测试",
+    "llm: 需要真实LLM调用的测试",
+]
+
+# 覆盖率配置
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/__pycache__/*",
+    "*/venv/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]

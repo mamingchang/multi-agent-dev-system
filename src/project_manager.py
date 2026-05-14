@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 
 from .database.models import (
     User, Project, ProjectMember, UserRole,
-    DBSession as SessionModel, Task
+    Session as SessionModel, Task
 )
 
 
@@ -298,6 +298,7 @@ class ProjectManager:
                 'id': project.id,
                 'name': project.name,
                 'description': project.description,
+                'created_by': project.created_by,
                 'role': membership.role.value,
                 'created_at': project.created_at.isoformat(),
                 'updated_at': project.updated_at.isoformat()

@@ -1,0 +1,43 @@
+{
+  "common": {
+    "welcome": "Welcome to Multi-Agent Development System",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "agents": "Agents",
+    "statistics": "Statistics"
+  },
+  "project": {
+    "create": "Create Project",
+    "import": "Import Project",
+    "name": "Project Name",
+    "description": "Description",
+    "status": "Status"
+  },
+  "agent": {
+    "architect": "Architect",
+    "developer": "Developer",
+    "tester": "Tester",
+    "reviewer": "Reviewer",
+    "deployer": "Deployer",
+    "monitor": "Monitor",
+    "human": "Human"
+  },
+  "im": {
+    "send_message": "Send Message",
+    "mention": "Mention",
+    "group_chat": "Group Chat",
+    "members": "Members"
+  }
+}

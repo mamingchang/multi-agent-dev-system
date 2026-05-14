@@ -49,5 +49,4 @@ echo "   访问: http://localhost:8000"
 echo "   API文档: http://localhost:8000/docs"
 echo ""
 
-cd backend
-python3 -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+python3 -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000

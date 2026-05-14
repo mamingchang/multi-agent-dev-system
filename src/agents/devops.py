@@ -1,89 +1,91 @@
 """
 DevOps Agent
-DevOps工程师：负责部署和运维
+运维工程师：负责部署和运维
+
+职责：
+1. 准备部署环境
+2. 配置CI/CD
+3. 执行部署
+4. 监控系统
 """
-from typing import Dict, Any
-import random
+
+import json
+from typing import Dict, Any, Optional
 from .base_agent import BaseAgent
 from ..workflow.task import Task, TaskStatus
+from ..llm import get_config_loader, LLMFactory, LLMClient, LLMError
 
 
 class DevOpsAgent(BaseAgent):
-    """DevOps工程师"""
+    """DevOps工程师Agent"""
 
     def __init__(self, name: str = "DevOps", config: Dict[str, Any] = None):
         super().__init__(name, "DevOps工程师", config)
+        self.llm_client: Optional[LLMClient] = None
+        self._initialize_llm()
 
-    def process(self, task: Task) -> Dict[str, Any]:
-        """
-        部署应用
+    def _initialize_llm(self):
+        try:
+            loader = get_config_loader()
+            llm_config = loader.get_agent_config(self.name)
+            self.llm_client = LLMFactory.create(llm_config)
+            print(f"[{self.name}] ✓ LLM客户端初始化成功")
+        except Exception as e:
+            print(f"[{self.name}] ⚠️  LLM客户端初始化失败")
+            self.llm_client = None
 
-        Args:
-            task: 任务对象
+    def _build_system_prompt(self) -> str:
+        return """你是DevOps工程师，负责部署和运维。
 
-        Returns:
-            处理结果
-        """
-        print(f"\n[{self.name}] 开始部署流程...")
+输出JSON格式：
+- deployment_plan: 部署计划
+- environment_config: 环境配置
+- ci_cd_pipeline: CI/CD流程
+- monitoring_setup: 监控配置
+- deployment_status: 部署状态
 
-        # 模拟部署过程
-        deployment = {
-            'environment': self.config.get('environment', 'production'),
-            'steps': [
-                {'name': '构建Docker镜像', 'status': 'success'},
-                {'name': '推送到镜像仓库', 'status': 'success'},
-                {'name': '更新Kubernetes配置', 'status': 'success'},
-                {'name': '执行数据库迁移', 'status': random.choice(['success', 'failed'])},
-                {'name': '部署到集群', 'status': 'success'},
-                {'name': '健康检查', 'status': 'success'}
-            ],
-            'deployment_url': f"https://app.example.com/v{random.randint(1, 10)}",
-            'rollback_available': True
+关注：自动化、可靠性、监控"""
+
+    def _deploy_with_llm(self, task: Task) -> Dict[str, Any]:
+        print(f"[{self.name}] 使用LLM规划部署...")
+        response = self.llm_client.call(
+            prompt=f"请为'{task.title}'规划部署方案",
+            system_prompt=self._build_system_prompt(),
+            temperature=0.5,
+            max_tokens=2048
+        )
+        try:
+            return json.loads(response.content)
+        except:
+            return self._deploy_basic(task)
+
+    def _deploy_basic(self, task: Task) -> Dict[str, Any]:
+        return {
+            "deployment_plan": "Docker容器化部署",
+            "environment_config": {"env": "production"},
+            "ci_cd_pipeline": "GitHub Actions",
+            "monitoring_setup": "待配置",
+            "deployment_status": "success"
         }
 
-        failed_steps = [s for s in deployment['steps'] if s['status'] == 'failed']
-        deployment['success'] = len(failed_steps) == 0
+    def process(self, task: Task) -> Dict[str, Any]:
+        print(f"\n{'='*80}\n[{self.name}] 开始部署\n{'='*80}")
+        task.update_status(TaskStatus.IN_DEPLOYMENT, self.name)
 
-        task.add_artifact(
-            artifact_type="deployment",
-            content=deployment,
-            agent=self.name
-        )
+        try:
+            deployment = self._deploy_with_llm(task) if self.llm_client else self._deploy_basic(task)
 
-        if deployment['success']:
+            print(f"[{self.name}] ✓ 部署完成")
+            print(f"  部署方式：{deployment.get('deployment_plan', 'N/A')}")
+
+            task.add_artifact(artifact_type="deployment_report", content=deployment, agent=self.name)
             task.update_status(TaskStatus.COMPLETED, self.name)
 
-        print(f"[{self.name}] 部署流程完成")
-        print(f"  - 环境: {deployment['environment']}")
-        print(f"  - 部署步骤: {len(deployment['steps'])}")
-        print(f"  - 失败步骤: {len(failed_steps)}")
-
-        if not deployment['success']:
-            task.add_feedback(
-                from_agent=self.name,
-                to_agent='Developer',
-                content=f"部署失败: {[s['name'] for s in failed_steps]}",
-                feedback_type='rejection'
-            )
-            result = {
-                'success': False,
-                'message': '部署失败',
-                'next_agent': 'Developer',
-                'deployment': deployment
-            }
-        else:
-            print(f"  - 部署地址: {deployment['deployment_url']}")
-            task.add_feedback(
-                from_agent=self.name,
-                to_agent='All',
-                content=f"部署成功! 访问地址: {deployment['deployment_url']}",
-                feedback_type='approval'
-            )
-            result = {
+            return {
                 'success': True,
-                'message': '部署成功',
+                'message': '部署完成，项目上线',
                 'next_agent': None,
                 'deployment': deployment
             }
-
-        return result
+        except Exception as e:
+            return {'success': False, 'message': str(e), 'next_agent': None}

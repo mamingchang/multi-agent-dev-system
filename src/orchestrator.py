@@ -148,8 +148,13 @@ class Orchestrator:
         print(f"  创建时间: {task.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"  完成时间: {task.updated_at.strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"\n产物:")
-        for artifact_type, artifact in task.artifacts.items():
-            print(f"    - {artifact_type}: 由 {artifact['created_by']} 创建")
+        # task.artifacts可能是list或dict
+        if isinstance(task.artifacts, dict):
+            for artifact_type, artifact in task.artifacts.items():
+                print(f"    - {artifact_type}: 由 {artifact['created_by']} 创建")
+        elif isinstance(task.artifacts, list):
+            for artifact in task.artifacts:
+                print(f"    - {artifact.get('type', 'unknown')}: 由 {artifact.get('created_by', 'unknown')} 创建")
         print(f"\n反馈记录: {len(task.feedback)}条")
 
     def get_agent(self, agent_name: str) -> Optional[BaseAgent]:

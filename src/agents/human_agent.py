@@ -6,9 +6,12 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 import time
 
-from .agents.base_agent import BaseAgent
-from .workflow.task import Task
-from .decision_queue import DecisionQueue
+from .base_agent import BaseAgent
+from src.decision_queue import DecisionQueue
+
+
+# Task类型提示（避免循环导入）
+Task = Dict[str, Any]
 
 
 class HumanAgent(BaseAgent):

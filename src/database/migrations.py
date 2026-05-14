@@ -3,13 +3,13 @@ Database initialization and migration utilities
 数据库初始化和迁移工具
 """
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session as DBSession
 from pathlib import Path
 import json
 from datetime import datetime
 from typing import Optional
 
-from .models import Base, User, Project, ProjectMember, Session as DBSession
+from .models import Base, User, Project, ProjectMember, Session as SessionModel
 from .models import Task, TaskEvent, PendingDecision, UserRole, SessionStatus, TaskStatus
 
 
@@ -37,7 +37,7 @@ class Database:
         Base.metadata.drop_all(bind=self.engine)
         print(f"✓ 所有表已删除: {self.db_path}")
 
-    def get_session(self) -> Session:
+    def get_session(self) -> DBSession:
         """获取数据库会话"""
         return self.SessionLocal()
 
@@ -98,16 +98,16 @@ class Database:
                     session_id = data.get('session_id')
 
                     # 检查是否已迁移
-                    existing = db_session.query(DBSession).filter_by(id=session_id).first()
+                    existing = db_session.query(SessionModel).filter_by(id=session_id).first()
                     if existing:
                         continue
 
                     # 创建Session
-                    session = DBSession(
+                    session = SessionModel(
                         id=session_id,
                         project_id=default_project.id,
                         status=SessionStatus(data.get('status', 'active')),
-                        metadata=data.get('metadata', {}),
+                        meta_data=data.get('metadata', {}),
                         created_at=datetime.fromisoformat(data['created_at']),
                         updated_at=datetime.fromisoformat(data['updated_at'])
                     )

@@ -1,0 +1,21 @@
+{
+  "common": {
+    "welcome": "Bienvenue dans le système de développement multi-agents",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "update": "Mettre à jour"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "projects": "Projets",
+    "tasks": "Tâches",
+    "agents": "Agents",
+    "statistics": "Statistiques"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "common": {
+    "welcome": "マルチエージェント開発システムへようこそ",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "update": "更新"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "projects": "プロジェクト",
+    "tasks": "タスク",
+    "agents": "エージェント",
+    "statistics": "統計"
+  }
+}

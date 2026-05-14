@@ -1,0 +1,43 @@
+{
+  "common": {
+    "welcome": "欢迎使用多Agent开发系统",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "update": "更新"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "projects": "项目",
+    "tasks": "任务",
+    "agents": "智能体",
+    "statistics": "统计"
+  },
+  "project": {
+    "create": "创建项目",
+    "import": "导入项目",
+    "name": "项目名称",
+    "description": "描述",
+    "status": "状态"
+  },
+  "agent": {
+    "architect": "架构师",
+    "developer": "开发者",
+    "tester": "测试员",
+    "reviewer": "审查员",
+    "deployer": "部署员",
+    "monitor": "监控员",
+    "human": "人工"
+  },
+  "im": {
+    "send_message": "发送消息",
+    "mention": "提及",
+    "group_chat": "群聊",
+    "members": "成员"
+  }
+}
