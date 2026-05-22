@@ -1,374 +1,320 @@
 """
-Project Manager
-项目和权限管理
+项目管理系统
+
+负责：
+1. 项目创建和配置
+2. 项目工作空间管理
+3. 项目会话管理
+4. 项目文件隔离
 """
-from typing import List, Optional, Dict, Any
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-
-from .database.models import (
-    User, Project, ProjectMember, UserRole,
-    Session as SessionModel, Task
-)
+import yaml
+import json
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+from datetime import datetime
 
 
-class PermissionError(Exception):
-    """权限错误"""
-    pass
+class Project:
+    """项目对象"""
+
+    def __init__(
+        self,
+        project_id: str,
+        project_name: str,
+        owner: str,
+        description: str = "",
+        agents: List[str] = None,
+        settings: Dict = None,
+        status: str = "active"
+    ):
+        self.project_id = project_id
+        self.project_name = project_name
+        self.owner = owner
+        self.description = description
+        self.agents = agents or []
+        self.settings = settings or {}
+        self.status = status
+        self.created_at = datetime.now().isoformat()
+        self.updated_at = self.created_at
+        self.tags = []
+
+    def to_dict(self) -> Dict[str, Any]:
+        """转换为字典"""
+        return {
+            'project_id': self.project_id,
+            'project_name': self.project_name,
+            'owner': self.owner,
+            'description': self.description,
+            'agents': self.agents,
+            'settings': self.settings,
+            'status': self.status,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+            'tags': self.tags
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Project':
+        """从字典创建"""
+        project = cls(
+            project_id=data['project_id'],
+            project_name=data['project_name'],
+            owner=data['owner'],
+            description=data.get('description', ''),
+            agents=data.get('agents', []),
+            settings=data.get('settings', {}),
+            status=data.get('status', 'active')
+        )
+        project.created_at = data.get('created_at', datetime.now().isoformat())
+        project.updated_at = data.get('updated_at', project.created_at)
+        project.tags = data.get('tags', [])
+        return project
 
 
 class ProjectManager:
     """项目管理器"""
 
-    # 权限定义：每个角色可以执行的操作
-    PERMISSIONS = {
-        UserRole.OWNER: {
-            'create_session', 'delete_session', 'execute_task',
-            'add_member', 'remove_member', 'update_member_role', 'manage_members',
-            'update_project', 'delete_project', 'view_project'
-        },
-        UserRole.ADMIN: {
-            'create_session', 'delete_session', 'execute_task',
-            'add_member', 'remove_member', 'update_member_role', 'manage_members',
-            'update_project', 'view_project'
-        },
-        UserRole.MEMBER: {
-            'create_session', 'execute_task', 'view_project'
-        },
-        UserRole.VIEWER: {
-            'view_project'
-        }
-    }
+    def __init__(self, user_id: str, base_dir: str = "users"):
+        self.user_id = user_id
+        self.base_dir = Path(base_dir)
+        self.projects_dir = self.base_dir / user_id / "projects"
+        self.projects_dir.mkdir(parents=True, exist_ok=True)
+        self.current_project_file = self.base_dir / user_id / ".current_project"
 
-    def __init__(self, db_session: Session):
-        """
-        初始化项目管理器
+    def create_project(
+        self,
+        project_name: str,
+        description: str = "",
+        agents: List[str] = None,
+        settings: Dict = None
+    ):
+        """创建新项目"""
+        if self.project_exists(project_name):
+            raise ValueError(f"项目已存在: {project_name}")
 
-        Args:
-            db_session: 数据库会话
-        """
-        self.db = db_session
-
-    def create_project(self, name: str, description: str, created_by: int) -> Project:
-        """
-        创建项目
-
-        Args:
-            name: 项目名称
-            description: 项目描述
-            created_by: 创建者用户ID
-
-        Returns:
-            创建的项目对象
-        """
+        project_id = project_name
         project = Project(
-            name=name,
+            project_id=project_id,
+            project_name=project_name,
+            owner=self.user_id,
             description=description,
-            created_by=created_by
+            agents=agents or [],
+            settings=settings or {}
         )
-        self.db.add(project)
-        self.db.commit()
-        self.db.refresh(project)
 
-        # 自动添加创建者为Owner
-        member = ProjectMember(
-            project_id=project.id,
-            user_id=created_by,
-            role=UserRole.OWNER
-        )
-        self.db.add(member)
-        self.db.commit()
+        project_dir = self.projects_dir / project_id
+        project_dir.mkdir(parents=True, exist_ok=True)
+        (project_dir / "sessions").mkdir(exist_ok=True)
+        (project_dir / "workspace").mkdir(exist_ok=True)
+        (project_dir / "artifacts").mkdir(exist_ok=True)
+        (project_dir / "docs").mkdir(exist_ok=True)
+
+        artifacts_dir = project_dir / "artifacts"
+        (artifacts_dir / "requirements").mkdir(exist_ok=True)
+        (artifacts_dir / "designs").mkdir(exist_ok=True)
+        (artifacts_dir / "code").mkdir(exist_ok=True)
+        (artifacts_dir / "tests").mkdir(exist_ok=True)
+        (artifacts_dir / "reviews").mkdir(exist_ok=True)
+        (artifacts_dir / "deployments").mkdir(exist_ok=True)
+
+        self._save_project(project)
+
+        readme_path = project_dir / "workspace" / "README.md"
+        with open(readme_path, 'w', encoding='utf-8') as f:
+            f.write(f"# {project_name}\n\n{description}\n\n创建时间: {project.created_at}\n")
 
         return project
 
-    def get_project(self, project_id: int) -> Optional[Project]:
-        """获取项目"""
-        return self.db.query(Project).filter_by(id=project_id).first()
+    def get_project(self, project_name: str):
+        """获取项目信息"""
+        config_path = self.projects_dir / project_name / "project.yaml"
+        if not config_path.exists():
+            return None
+        with open(config_path, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+        return Project.from_dict(data)
 
-    def update_project(self, project_id: int, user_id: int, **kwargs) -> Project:
-        """
-        更新项目信息
+    def project_exists(self, project_name: str) -> bool:
+        """检查项目是否存在"""
+        return (self.projects_dir / project_name / "project.yaml").exists()
 
-        Args:
-            project_id: 项目ID
-            user_id: 操作用户ID
-            **kwargs: 要更新的字段
-
-        Returns:
-            更新后的项目对象
-
-        Raises:
-            PermissionError: 无权限
-        """
-        if not self.check_permission(project_id, user_id, 'update_project'):
-            raise PermissionError(f"用户 {user_id} 无权更新项目 {project_id}")
-
-        project = self.get_project(project_id)
-        if not project:
-            raise ValueError(f"项目 {project_id} 不存在")
-
-        for key, value in kwargs.items():
-            if hasattr(project, key):
-                setattr(project, key, value)
-
-        self.db.commit()
-        self.db.refresh(project)
-        return project
-
-    def delete_project(self, project_id: int, user_id: int) -> bool:
-        """
-        删除项目
-
-        Args:
-            project_id: 项目ID
-            user_id: 操作用户ID
-
-        Returns:
-            是否成功删除
-
-        Raises:
-            PermissionError: 无权限
-        """
-        if not self.check_permission(project_id, user_id, 'delete_project'):
-            raise PermissionError(f"用户 {user_id} 无权删除项目 {project_id}")
-
-        project = self.get_project(project_id)
-        if not project:
-            return False
-
-        self.db.delete(project)
-        self.db.commit()
-        return True
-
-    def add_member(self, project_id: int, user_id: int, new_member_id: int, role: UserRole = UserRole.MEMBER) -> ProjectMember:
-        """
-        添加项目成员
-
-        Args:
-            project_id: 项目ID
-            user_id: 操作用户ID
-            new_member_id: 新成员用户ID
-            role: 角色
-
-        Returns:
-            成员关系对象
-
-        Raises:
-            PermissionError: 无权限
-        """
-        if not self.check_permission(project_id, user_id, 'add_member'):
-            raise PermissionError(f"用户 {user_id} 无权添加成员到项目 {project_id}")
-
-        try:
-            member = ProjectMember(
-                project_id=project_id,
-                user_id=new_member_id,
-                role=role
-            )
-            self.db.add(member)
-            self.db.commit()
-            self.db.refresh(member)
-            return member
-        except IntegrityError:
-            self.db.rollback()
-            raise ValueError(f"用户 {new_member_id} 已经是项目 {project_id} 的成员")
-
-    def remove_member(self, project_id: int, user_id: int, member_id: int) -> bool:
-        """
-        移除项目成员
-
-        Args:
-            project_id: 项目ID
-            user_id: 操作用户ID
-            member_id: 要移除的成员用户ID
-
-        Returns:
-            是否成功移除
-
-        Raises:
-            PermissionError: 无权限
-        """
-        if not self.check_permission(project_id, user_id, 'remove_member'):
-            raise PermissionError(f"用户 {user_id} 无权移除项目 {project_id} 的成员")
-
-        # 不能移除Owner
-        member = self.db.query(ProjectMember).filter_by(
-            project_id=project_id,
-            user_id=member_id
-        ).first()
-
-        if not member:
-            return False
-
-        if member.role == UserRole.OWNER:
-            raise ValueError("不能移除项目所有者")
-
-        self.db.delete(member)
-        self.db.commit()
-        return True
-
-    def update_member_role(self, project_id: int, user_id: int, member_id: int, new_role: UserRole) -> ProjectMember:
-        """
-        更新成员角色
-
-        Args:
-            project_id: 项目ID
-            user_id: 操作用户ID
-            member_id: 要更新的成员用户ID
-            new_role: 新角色
-
-        Returns:
-            更新后的成员关系对象
-
-        Raises:
-            PermissionError: 无权限
-        """
-        if not self.check_permission(project_id, user_id, 'update_member_role'):
-            raise PermissionError(f"用户 {user_id} 无权更新项目 {project_id} 的成员角色")
-
-        member = self.db.query(ProjectMember).filter_by(
-            project_id=project_id,
-            user_id=member_id
-        ).first()
-
-        if not member:
-            raise ValueError(f"用户 {member_id} 不是项目 {project_id} 的成员")
-
-        # 不能修改Owner角色
-        if member.role == UserRole.OWNER:
-            raise ValueError("不能修改项目所有者的角色")
-
-        member.role = new_role
-        self.db.commit()
-        self.db.refresh(member)
-        return member
-
-    def get_user_role(self, project_id: int, user_id: int) -> Optional[UserRole]:
-        """
-        获取用户在项目中的角色
-
-        Args:
-            project_id: 项目ID
-            user_id: 用户ID
-
-        Returns:
-            用户角色，如果不是成员则返回None
-        """
-        member = self.db.query(ProjectMember).filter_by(
-            project_id=project_id,
-            user_id=user_id
-        ).first()
-
-        return member.role if member else None
-
-    def check_permission(self, project_id: int, user_id: int, action: str) -> bool:
-        """
-        检查用户是否有权限执行某个操作
-
-        Args:
-            project_id: 项目ID
-            user_id: 用户ID
-            action: 操作名称
-
-        Returns:
-            是否有权限
-        """
-        role = self.get_user_role(project_id, user_id)
-        if not role:
-            return False
-
-        return action in self.PERMISSIONS.get(role, set())
-
-    def list_user_projects(self, user_id: int) -> List[Dict[str, Any]]:
-        """
-        列出用户参与的所有项目
-
-        Args:
-            user_id: 用户ID
-
-        Returns:
-            项目列表
-        """
-        memberships = self.db.query(ProjectMember).filter_by(user_id=user_id).all()
-
+    def list_projects(self, status: str = None):
+        """列出所有项目"""
         projects = []
-        for membership in memberships:
-            project = membership.project
-            projects.append({
-                'id': project.id,
-                'name': project.name,
-                'description': project.description,
-                'created_by': project.created_by,
-                'role': membership.role.value,
-                'created_at': project.created_at.isoformat(),
-                'updated_at': project.updated_at.isoformat()
-            })
-
+        for project_dir in self.projects_dir.iterdir():
+            if project_dir.is_dir():
+                config_path = project_dir / "project.yaml"
+                if config_path.exists():
+                    with open(config_path, 'r', encoding='utf-8') as f:
+                        data = yaml.safe_load(f)
+                    project = Project.from_dict(data)
+                    if status is None or project.status == status:
+                        projects.append(project)
+        projects.sort(key=lambda p: p.created_at, reverse=True)
         return projects
 
-    def list_project_members(self, project_id: int, user_id: int) -> List[Dict[str, Any]]:
+    def update_project(self, project_name: str, updates: Dict[str, Any]):
+        """更新项目信息"""
+        project = self.get_project(project_name)
+        if not project:
+            raise ValueError(f"项目不存在: {project_name}")
+        if 'description' in updates:
+            project.description = updates['description']
+        if 'agents' in updates:
+            project.agents = updates['agents']
+        if 'settings' in updates:
+            project.settings.update(updates['settings'])
+        if 'status' in updates:
+            project.status = updates['status']
+        if 'tags' in updates:
+            project.tags = updates['tags']
+        project.updated_at = datetime.now().isoformat()
+        self._save_project(project)
+        return project
+
+    def archive_project(self, project_name: str):
+        """归档项目"""
+        return self.update_project(project_name, {'status': 'archived'})
+
+    def activate_project(self, project_name: str):
+        """激活项目"""
+        return self.update_project(project_name, {'status': 'active'})
+
+    def delete_project(self, project_name: str):
+        """删除项目"""
+        if not self.project_exists(project_name):
+            raise ValueError(f"项目不存在: {project_name}")
+        import shutil
+        project_dir = self.projects_dir / project_name
+        shutil.rmtree(project_dir)
+
+    def set_current_project(self, project_name: str):
+        """设置当前项目"""
+        if not self.project_exists(project_name):
+            raise ValueError(f"项目不存在: {project_name}")
+        with open(self.current_project_file, 'w', encoding='utf-8') as f:
+            f.write(project_name)
+
+    def get_current_project(self):
+        """获取当前项目"""
+        if not self.current_project_file.exists():
+            return None
+        with open(self.current_project_file, 'r', encoding='utf-8') as f:
+            project_name = f.read().strip()
+        return self.get_project(project_name)
+
+    def get_current_project_name(self):
+        """获取当前项目名称"""
+        project = self.get_current_project()
+        return project.project_name if project else None
+
+    def get_project_dir(self, project_name: str) -> Path:
+        """获取项目根目录"""
+        return self.projects_dir / project_name
+
+    def get_project_workspace(self, project_name: str) -> Path:
+        """获取项目工作空间路径"""
+        return self.projects_dir / project_name / "workspace"
+
+    def get_project_sessions_dir(self, project_name: str) -> Path:
+        """获取项目会话目录"""
+        return self.projects_dir / project_name / "sessions"
+
+    def get_project_artifacts_dir(self, project_name: str) -> Path:
+        """获取项目产物目录"""
+        return self.projects_dir / project_name / "artifacts"
+
+    def get_project_docs_dir(self, project_name: str) -> Path:
+        """获取项目文档目录"""
+        return self.projects_dir / project_name / "docs"
+
+    def list_project_sessions(self, project_name: str):
+        """列出项目的所有会话"""
+        sessions_dir = self.get_project_sessions_dir(project_name)
+        if not sessions_dir.exists():
+            return []
+        sessions = []
+        for session_file in sessions_dir.glob("*.json"):
+            try:
+                with open(session_file, 'r', encoding='utf-8') as f:
+                    session = json.load(f)
+                sessions.append(session)
+            except Exception as e:
+                print(f"读取会话失败 {session_file}: {e}")
+        sessions.sort(key=lambda s: s.get('created_at', ''), reverse=True)
+        return sessions
+
+    def _save_project(self, project):
+        """保存项目配置"""
+        config_path = self.projects_dir / project.project_id / "project.yaml"
+        with open(config_path, 'w', encoding='utf-8') as f:
+            yaml.dump(project.to_dict(), f, allow_unicode=True)
+
+    def add_agent_to_project(self, project_name: str, agent_name: str, agent_source: str = None):
         """
-        列出项目的所有成员
+        添加Agent到项目
 
         Args:
-            project_id: 项目ID
-            user_id: 操作用户ID
+            project_name: 项目名称
+            agent_name: Agent名称
+            agent_source: Agent来源（格式：user_id:agent_name，表示使用其他用户的公开Agent）
 
         Returns:
-            成员列表
-
-        Raises:
-            PermissionError: 无权限
+            bool: 是否成功
         """
-        if not self.check_permission(project_id, user_id, 'view_project'):
-            raise PermissionError(f"用户 {user_id} 无权查看项目 {project_id}")
+        project = self.get_project(project_name)
+        if not project:
+            raise ValueError(f"项目不存在: {project_name}")
 
-        members = self.db.query(ProjectMember).filter_by(project_id=project_id).all()
+        # 构建Agent标识
+        if agent_source:
+            agent_id = agent_source  # 使用完整的agent_id
+        else:
+            agent_id = agent_name  # 使用当前用户的Agent
 
-        result = []
-        for member in members:
-            user = member.user
-            result.append({
-                'user_id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'full_name': user.full_name,
-                'role': member.role.value,
-                'joined_at': member.joined_at.isoformat()
-            })
+        # 检查是否已存在
+        if agent_id in project.agents:
+            return False
 
-        return result
+        project.agents.append(agent_id)
+        project.updated_at = datetime.now().isoformat()
+        self._save_project(project)
+        return True
 
-    def get_project_stats(self, project_id: int, user_id: int) -> Dict[str, Any]:
+    def remove_agent_from_project(self, project_name: str, agent_name: str):
         """
-        获取项目统计信息
+        从项目移除Agent
 
         Args:
-            project_id: 项目ID
-            user_id: 操作用户ID
+            project_name: 项目名称
+            agent_name: Agent名称
 
         Returns:
-            统计信息
-
-        Raises:
-            PermissionError: 无权限
+            bool: 是否成功
         """
-        if not self.check_permission(project_id, user_id, 'view_project'):
-            raise PermissionError(f"用户 {user_id} 无权查看项目 {project_id}")
+        project = self.get_project(project_name)
+        if not project:
+            raise ValueError(f"项目不存在: {project_name}")
 
-        # 统计会话数
-        session_count = self.db.query(SessionModel).filter_by(project_id=project_id).count()
+        if agent_name in project.agents:
+            project.agents.remove(agent_name)
+            project.updated_at = datetime.now().isoformat()
+            self._save_project(project)
+            return True
+        return False
 
-        # 统计任务数
-        task_count = self.db.query(Task).join(SessionModel).filter(
-            SessionModel.project_id == project_id
-        ).count()
+    def list_project_agents(self, project_name: str) -> List[str]:
+        """
+        列出项目的Agent
 
-        # 统计成员数
-        member_count = self.db.query(ProjectMember).filter_by(project_id=project_id).count()
+        Args:
+            project_name: 项目名称
 
-        return {
-            'session_count': session_count,
-            'task_count': task_count,
-            'member_count': member_count
-        }
+        Returns:
+            List[str]: Agent列表
+        """
+        project = self.get_project(project_name)
+        if not project:
+            return []
+        return project.agents or []
+

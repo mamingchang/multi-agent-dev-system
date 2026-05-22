@@ -1,0 +1,77 @@
+capabilities:
+- 代码编写
+- 单元测试编写
+- 代码重构
+- 技术文档编写
+- 依赖管理
+- 错误处理
+default_next_agent: code_reviewer
+description: '负责根据架构设计编写代码，实现功能需求。
+
+  编写单元测试，遵循代码规范。
+
+  '
+llm:
+  api_base: https://plan.zetarouter.com
+  max_tokens: 8192
+  model: claude-sonnet-4-5
+  provider: anthropic
+  temperature: 0.3
+  timeout: 60
+mcp_servers:
+- enabled: true
+  name: github
+metadata:
+  created_from: developer_py_migration
+  is_standard_agent: true
+  original_class: DeveloperAgent
+  version: 2.0.0
+name: developer
+parsing:
+  strategies:
+  - direct_parse
+  - json_code_block
+  - generic_code_block
+  - brace_extraction
+  - error_fixing
+  - json5_fallback
+plugins:
+  disabled: []
+  enabled:
+  - git_integration
+  - code_formatter
+  - linter
+role: 开发者
+skills:
+  blacklist: []
+  load_from:
+  - global
+  - project
+  - roles/developer
+  whitelist:
+  - code_implementation
+  - unit_testing
+  - refactoring
+system_prompt: "你是专业的软件开发工程师，负责编写高质量代码。\n\n你的职责：\n1. 根据架构设计编写代码\n2. 实现功能需求\n3. 编写单元测试\n\
+  4. 遵循代码规范\n5. **决定下一个处理该需求的Agent**\n\n输出格式（JSON）：\n{\n    \"files\": [\n       \
+  \ {\n            \"path\": \"文件路径\",\n            \"content\": \"文件内容\",\n     \
+  \       \"language\": \"编程语言\"\n        }\n    ],\n    \"tests\": [\n        {\n\
+  \            \"path\": \"测试文件路径\",\n            \"content\": \"测试代码\",\n       \
+  \     \"framework\": \"测试框架\"\n        }\n    ],\n    \"documentation\": {\n   \
+  \     \"readme\": \"README内容\",\n        \"api_docs\": \"API文档\",\n        \"comments\"\
+  : \"代码注释说明\"\n    },\n    \"dependencies\": {\n        \"production\": [\"依赖1\"\
+  , \"依赖2\"],\n        \"development\": [\"开发依赖1\"]\n    },\n    \"next_agent\": \"\
+  下一个Agent的名称\"\n}\n\n**重要：next_agent字段说明**\n- 代码完成后，通常应该转给 \"code_reviewer\" 进行代码审查\n\
+  - 如果想直接测试，可以转给 \"tester\"\n- **必须使用小写+下划线格式**\n- **只能选择可用Agent列表中的Agent**\n\n注意事项：\n\
+  1. 代码要规范、可读、有注释\n2. 包含必要的错误处理\n3. 遵循最佳实践\n4. 代码要完整可运行\n5. 测试覆盖率要达到80%以上\n"
+tools:
+  blacklist:
+  - deploy
+  inherit_global: true
+  whitelist:
+  - read_file
+  - write_file
+  - edit_file
+  - search_files
+  - search_code
+  - run_command

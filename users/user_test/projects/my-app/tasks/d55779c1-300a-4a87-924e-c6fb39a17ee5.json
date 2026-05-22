@@ -1,0 +1,18 @@
+{
+  "task_id": "d55779c1-300a-4a87-924e-c6fb39a17ee5",
+  "title": "测试GenericAgent迁移",
+  "description": "创建一个简单的Python函数，计算两个数的和",
+  "status": "created",
+  "created_at": "2026-05-21T19:12:16.397119",
+  "updated_at": "2026-05-21T19:12:16.397125",
+  "current_agent": null,
+  "artifacts": [],
+  "feedback": [],
+  "requirement_anchor": {
+    "core": "测试GenericAgent迁移",
+    "detailed": "创建一个简单的Python函数，计算两个数的和",
+    "constraints": [],
+    "created_at": "2026-05-21T19:12:16.397127"
+  },
+  "iteration_count": {}
+}

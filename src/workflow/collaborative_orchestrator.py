@@ -14,10 +14,11 @@
 - 需要检测争议并升级到人工
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 from ..workflow.task import Task, TaskStatus
 from ..agents.base_agent import BaseAgent
 from ..conversation import MessageType
+import time
 
 
 class CollaborativeOrchestrator:
@@ -36,7 +37,9 @@ class CollaborativeOrchestrator:
         self,
         agents: List[BaseAgent],
         max_iterations_per_agent: int = 5,
-        max_dispute_rounds: int = 3
+        max_dispute_rounds: int = 3,
+        decision_queue = None,
+        human_input_callback: Optional[Callable] = None
     ):
         """
         初始化协作式Orchestrator
@@ -45,10 +48,14 @@ class CollaborativeOrchestrator:
             agents: Agent列表（按执行顺序）
             max_iterations_per_agent: 每个Agent最多执行次数
             max_dispute_rounds: 最多争议轮次（超过后升级人工）
+            decision_queue: 决策队列（用于人工介入）
+            human_input_callback: 人工输入回调函数（用于同步获取人工输入）
         """
         self.agents = agents
         self.max_iterations_per_agent = max_iterations_per_agent
         self.max_dispute_rounds = max_dispute_rounds
+        self.decision_queue = decision_queue
+        self.human_input_callback = human_input_callback
 
         # 创建Agent名称到Agent对象的映射
         self.agent_map = {agent.name: agent for agent in agents}
@@ -153,11 +160,59 @@ class CollaborativeOrchestrator:
 
                     if self.dispute_count[dispute_key] > self.max_dispute_rounds:
                         print(f"⚠️  争议轮次超限({self.dispute_count[dispute_key]}轮)")
-                        return self._escalate_to_human(
+
+                        # 升级到人工介入
+                        escalation_result = self._escalate_to_human(
                             task, agent.name,
                             "争议无法解决，需要人工裁决",
                             level="critical"
                         )
+
+                        # 处理人工决策
+                        if escalation_result['success'] and escalation_result.get('human_decision'):
+                            human_decision = escalation_result['human_decision']
+                            action = human_decision.get('action', 'continue')
+
+                            print(f"\n👤 人工决策: {action}")
+
+                            if action == 'continue':
+                                # 继续执行，进入下一个Agent
+                                print(f"   继续执行，进入下一阶段")
+                                current_agent_index += 1
+                                self.dispute_count[dispute_key] = 0
+                                continue
+
+                            elif action == 'retry':
+                                # 重试当前Agent
+                                print(f"   重试当前Agent")
+                                self.dispute_count[dispute_key] = 0
+                                continue
+
+                            elif action == 'skip':
+                                # 跳过当前Agent
+                                print(f"   跳过当前Agent")
+                                current_agent_index += 1
+                                self.dispute_count[dispute_key] = 0
+                                continue
+
+                            elif action == 'abort':
+                                # 终止任务
+                                print(f"   终止任务")
+                                return {
+                                    'success': False,
+                                    'message': '任务被人工终止',
+                                    'final_status': task.status.value
+                                }
+
+                            else:
+                                # 自定义指令，传给Agent
+                                print(f"   执行自定义指令: {human_decision.get('instruction', '')}")
+                                # 可以把指令添加到task的context中，让Agent读取
+                                continue
+
+                        else:
+                            # 人工介入失败，返回错误
+                            return escalation_result
 
                     # 继续当前Agent（重新执行）
                     print(f"🔄 {agent.name} 将根据反馈修改")
@@ -472,7 +527,7 @@ class CollaborativeOrchestrator:
             level: 升级级别
 
         Returns:
-            Dict: 执行结果
+            Dict: 执行结果（包含人工决策）
         """
         level_icons = {
             'warning': '⚠️',
@@ -486,7 +541,7 @@ class CollaborativeOrchestrator:
         print(f"原因: {reason}")
         print(f"当前Agent: {agent_name}")
 
-        # 发送系统消息
+        # 发送系统消息到对话系统
         if task.conversation:
             task.conversation.add_message(
                 from_agent="System",
@@ -500,13 +555,162 @@ class CollaborativeOrchestrator:
                 message_type=MessageType.INFO
             )
 
+        # 如果是warning级别，不需要等待人工，直接继续
+        if level == "warning":
+            return {
+                'success': True,
+                'message': f'警告已记录，继续执行',
+                'human_decision': None
+            }
+
+        # 如果是emergency级别，立即停止
+        if level == "emergency":
+            return {
+                'success': False,
+                'message': f'紧急停止: {reason}',
+                'final_status': task.status.value,
+                'escalation': {
+                    'level': level,
+                    'reason': reason,
+                    'agent': agent_name
+                }
+            }
+
+        # critical级别：等待人工决策
+        print(f"\n⏸️  暂停执行，等待人工决策...")
+
+        # 方式1：使用DecisionQueue（异步，适合Web应用）
+        if self.decision_queue:
+            decision = self._wait_for_decision_queue(task, agent_name, reason)
+            if decision:
+                return {
+                    'success': True,
+                    'message': '人工决策已收到',
+                    'human_decision': decision
+                }
+
+        # 方式2：使用回调函数（同步，适合CLI/测试）
+        if self.human_input_callback:
+            decision = self._wait_for_human_input(task, agent_name, reason)
+            if decision:
+                return {
+                    'success': True,
+                    'message': '人工决策已收到',
+                    'human_decision': decision
+                }
+
+        # 如果没有配置人工介入机制，返回失败
         return {
             'success': False,
-            'message': f'需要人工介入 [{level}]: {reason}',
+            'message': f'需要人工介入但未配置人工介入机制 [{level}]: {reason}',
             'final_status': task.status.value,
             'escalation': {
                 'level': level,
                 'reason': reason,
                 'agent': agent_name
             }
+        }
+
+    def _wait_for_decision_queue(
+        self,
+        task: Task,
+        agent_name: str,
+        reason: str,
+        timeout_seconds: int = 300
+    ) -> Optional[Dict[str, Any]]:
+        """
+        等待DecisionQueue中的人工决策（异步方式）
+
+        Args:
+            task: 任务对象
+            agent_name: Agent名称
+            reason: 升级原因
+            timeout_seconds: 超时时间（秒）
+
+        Returns:
+            Dict: 人工决策，如果超时返回None
+        """
+        # 创建决策到队列
+        decision = self.decision_queue.create_decision(
+            task_id=task.task_id,
+            agent_name=agent_name,
+            decision_type="dispute_resolution",
+            context={
+                'reason': reason,
+                'conversation': task.conversation.to_dict() if task.conversation else {},
+                'artifacts': task.artifacts
+            }
+        )
+
+        print(f"📋 决策已创建: ID={decision.id}")
+        print(f"   请在Web界面或API中处理此决策")
+
+        # 轮询等待决策被解决
+        start_time = time.time()
+        while time.time() - start_time < timeout_seconds:
+            # 刷新决策状态
+            self.decision_queue.db.refresh(decision)
+
+            if decision.status.value == "resolved":
+                print(f"✅ 收到人工决策")
+                return decision.response
+
+            if decision.status.value in ["cancelled", "timeout"]:
+                print(f"❌ 决策被取消或超时")
+                return None
+
+            # 每5秒检查一次
+            time.sleep(5)
+
+        # 超时
+        print(f"⏱️  等待人工决策超时 ({timeout_seconds}秒)")
+        self.decision_queue.check_timeout(decision.id, timeout_minutes=timeout_seconds // 60)
+        return None
+
+    def _wait_for_human_input(
+        self,
+        task: Task,
+        agent_name: str,
+        reason: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        等待人工输入（同步方式，通过回调函数）
+
+        Args:
+            task: 任务对象
+            agent_name: Agent名称
+            reason: 升级原因
+
+        Returns:
+            Dict: 人工决策
+        """
+        print(f"\n{'='*60}")
+        print(f"🙋 需要人工决策")
+        print(f"{'='*60}")
+        print(f"Agent: {agent_name}")
+        print(f"原因: {reason}")
+        print(f"\n请提供决策:")
+        print(f"  1. 'continue' - 继续执行")
+        print(f"  2. 'retry' - 重试当前Agent")
+        print(f"  3. 'skip' - 跳过当前Agent")
+        print(f"  4. 'abort' - 终止任务")
+        print(f"  5. 或输入具体指令")
+        print(f"{'='*60}\n")
+
+        # 调用回调函数获取人工输入
+        human_response = self.human_input_callback(task, agent_name, reason)
+
+        # 记录人工决策到对话系统
+        if task.conversation:
+            task.conversation.add_message(
+                from_agent="Human",
+                to_agent=agent_name,
+                content=human_response,
+                message_type=MessageType.CLARIFICATION
+            )
+
+        return {
+            'action': human_response.get('action', 'continue'),
+            'instruction': human_response.get('instruction', ''),
+            'timestamp': time.time()
         }

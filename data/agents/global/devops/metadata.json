@@ -1,0 +1,7 @@
+{
+  "agent_id": "devops",
+  "version": "2.0.0",
+  "created_from": "migration_script",
+  "is_standard_agent": true,
+  "original_class": "DevOpsAgent"
+}

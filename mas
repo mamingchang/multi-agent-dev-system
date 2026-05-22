@@ -1,0 +1,6 @@
+#!/bin/bash
+# Multi-Agent Dev System CLI快捷脚本
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
+python3 cli/main.py "$@"

@@ -1,6 +1,10 @@
 """
-Session Manager
+Session Manager（支持项目层）
 会话管理器：管理多个工作流会话，支持持久化和恢复
+
+改进：
+- 支持项目层：会话保存到项目目录
+- 向后兼容：如果未指定项目，保存到全局目录
 """
 import json
 import uuid
@@ -13,9 +17,10 @@ from .workflow.task import Task, TaskStatus
 class Session:
     """会话对象"""
 
-    def __init__(self, session_id: str = None, user_id: str = None):
+    def __init__(self, session_id: str = None, user_id: str = None, project_name: str = None):
         self.session_id = session_id or str(uuid.uuid4())
         self.user_id = user_id or "default_user"
+        self.project_name = project_name  # 新增：项目名称
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
         self.tasks: Dict[str, Task] = {}
@@ -40,6 +45,7 @@ class Session:
         return {
             'session_id': self.session_id,
             'user_id': self.user_id,
+            'project_name': self.project_name,  # 新增
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
             'status': self.status,
@@ -55,7 +61,8 @@ class Session:
         """从字典反序列化"""
         session = cls(
             session_id=data['session_id'],
-            user_id=data['user_id']
+            user_id=data['user_id'],
+            project_name=data.get('project_name')  # 新增
         )
         session.created_at = datetime.fromisoformat(data['created_at'])
         session.updated_at = datetime.fromisoformat(data['updated_at'])
@@ -81,18 +88,61 @@ class Session:
 
 
 class SessionManager:
-    """会话管理器"""
+    """
+    会话管理器
 
-    def __init__(self, storage_path: str = "./sessions"):
-        self.storage_path = Path(storage_path)
+    支持项目层隔离：
+    - 如果指定user_id和project_name，会话保存到项目目录
+    - 如果未指定，保存到全局目录（向后兼容）
+    """
+
+    def __init__(self, user_id: str = None, project_name: str = None, storage_path: str = None):
+        """
+        初始化会话管理器
+
+        Args:
+            user_id: 用户ID
+            project_name: 项目名称
+            storage_path: 存储路径（如果提供，覆盖默认路径）
+        """
+        self.user_id = user_id
+        self.project_name = project_name
+
+        if storage_path:
+            # 使用指定路径
+            self.storage_path = Path(storage_path)
+        elif user_id and project_name:
+            # 新架构：项目级会话目录
+            self.storage_path = Path('users') / user_id / 'projects' / project_name / 'sessions'
+        else:
+            # 旧架构：全局会话目录（向后兼容）
+            self.storage_path = Path('./sessions')
+
         self.storage_path.mkdir(parents=True, exist_ok=True)
         self.active_sessions: Dict[str, Session] = {}
 
-    def create_session(self, user_id: str = None) -> Session:
-        """创建新会话"""
-        session = Session(user_id=user_id)
+    def create_session(self, user_id: str = None, project_name: str = None) -> Session:
+        """
+        创建新会话
+
+        Args:
+            user_id: 用户ID（如果未提供，使用初始化时的user_id）
+            project_name: 项目名称（如果未提供，使用初始化时的project_name）
+
+        Returns:
+            Session: 新会话对象
+        """
+        session = Session(
+            user_id=user_id or self.user_id,
+            project_name=project_name or self.project_name
+        )
         self.active_sessions[session.session_id] = session
-        print(f"✓ 创建会话: {session.session_id} (用户: {session.user_id})")
+
+        if session.project_name:
+            print(f"✓ 创建会话: {session.session_id} (用户: {session.user_id}, 项目: {session.project_name})")
+        else:
+            print(f"✓ 创建会话: {session.session_id} (用户: {session.user_id})")
+
         return session
 
     def get_session(self, session_id: str) -> Optional[Session]:
@@ -113,7 +163,12 @@ class SessionManager:
             file_path = self.storage_path / f"{session.session_id}.json"
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(session.to_dict(), f, indent=2, ensure_ascii=False)
-            print(f"✓ 会话已保存: {session.session_id}")
+
+            if session.project_name:
+                print(f"✓ 会话已保存: {session.session_id} (项目: {session.project_name})")
+            else:
+                print(f"✓ 会话已保存: {session.session_id}")
+
             return True
         except Exception as e:
             print(f"✗ 保存会话失败: {e}")
@@ -136,8 +191,17 @@ class SessionManager:
             print(f"✗ 加载会话失败: {e}")
             return None
 
-    def list_sessions(self, user_id: str = None) -> List[Dict[str, Any]]:
-        """列出所有会话"""
+    def list_sessions(self, user_id: str = None, project_name: str = None) -> List[Dict[str, Any]]:
+        """
+        列出所有会话
+
+        Args:
+            user_id: 过滤用户ID（可选）
+            project_name: 过滤项目名称（可选）
+
+        Returns:
+            会话列表
+        """
         sessions = []
 
         # 扫描磁盘上的会话文件
@@ -146,15 +210,21 @@ class SessionManager:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
 
-                if user_id is None or data['user_id'] == user_id:
-                    sessions.append({
-                        'session_id': data['session_id'],
-                        'user_id': data['user_id'],
-                        'status': data['status'],
-                        'created_at': data['created_at'],
-                        'updated_at': data['updated_at'],
-                        'task_count': len(data['tasks'])
-                    })
+                # 过滤条件
+                if user_id and data.get('user_id') != user_id:
+                    continue
+                if project_name and data.get('project_name') != project_name:
+                    continue
+
+                sessions.append({
+                    'session_id': data['session_id'],
+                    'user_id': data.get('user_id', 'N/A'),
+                    'project_name': data.get('project_name', 'N/A'),
+                    'status': data['status'],
+                    'created_at': data['created_at'],
+                    'updated_at': data['updated_at'],
+                    'task_count': len(data['tasks'])
+                })
             except Exception as e:
                 print(f"✗ 读取会话文件失败 {file_path}: {e}")
 
@@ -218,3 +288,27 @@ class SessionManager:
 
         print(f"✓ 清理了 {deleted_count} 个旧会话")
         return deleted_count
+
+    @staticmethod
+    def get_project_session_manager(user_id: str, project_name: str) -> 'SessionManager':
+        """
+        获取项目级会话管理器（工厂方法）
+
+        Args:
+            user_id: 用户ID
+            project_name: 项目名称
+
+        Returns:
+            SessionManager: 项目级会话管理器
+        """
+        return SessionManager(user_id=user_id, project_name=project_name)
+
+    @staticmethod
+    def get_global_session_manager() -> 'SessionManager':
+        """
+        获取全局会话管理器（工厂方法，向后兼容）
+
+        Returns:
+            SessionManager: 全局会话管理器
+        """
+        return SessionManager()

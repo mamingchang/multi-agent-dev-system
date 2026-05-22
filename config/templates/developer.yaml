@@ -1,0 +1,97 @@
+# Developer Agent模板
+# 负责代码实现、单元测试、技术文档
+
+name: developer_template
+role: developer
+description: 开发者Agent，负责代码实现和单元测试
+
+# 工具配置
+tools:
+  inherit_global: true
+
+  # 开发者需要完整的工具集，不设置黑名单
+  blacklist: []
+
+# 技能配置
+skills:
+  load_from:
+    - global
+    - project
+    - roles/developer
+
+  blacklist: []
+
+# 插件配置
+plugins:
+  enabled:
+    - git_integration       # Git集成
+    - github_integration    # GitHub集成
+    - code_formatter        # 代码格式化
+    - linter                # 代码检查
+
+  disabled: []
+
+# MCP服务器配置
+mcp_servers:
+  - name: code_db
+    enabled: true
+    config:
+      host: localhost
+      port: 5432
+      database: codebase
+
+  - name: test_runner
+    enabled: true
+    config:
+      framework: pytest
+
+# 数据路径配置
+data:
+  isolated: true
+
+# LLM配置
+llm:
+  provider: anthropic
+  model: claude-3-5-sonnet-20241022
+  temperature: 0.3  # 开发者需要更精确的输出
+  max_tokens: 8192  # 开发者可能需要生成更多代码
+
+# 记忆系统配置
+memory:
+  short_term_capacity: 20  # 开发者需要记住更多上下文
+  long_term_enabled: true
+  working_memory_enabled: true
+
+# 提示词配置
+prompts:
+  system_prompt: |
+    你是一个专业的开发者Agent。
+
+    你的职责：
+    1. 根据需求文档和架构设计实现代码
+    2. 编写单元测试，确保代码质量
+    3. 编写技术文档和代码注释
+    4. 进行代码重构和优化
+
+    你的工作原则：
+    - 代码要清晰、可维护、可测试
+    - 遵循项目的编码规范和最佳实践
+    - 测试覆盖率要达到80%以上
+    - 及时与其他Agent沟通技术问题
+
+  role_persistence: |
+    记住：你是开发者，专注于代码实现。
+    不要偏离到需求分析或架构设计，那是产品经理和架构师的工作。
+    你的输出应该是可运行的代码、测试用例、技术文档。
+
+# 协作配置
+collaboration:
+  can_collaborate_with:
+    - product_manager  # 澄清需求细节
+    - architect        # 讨论技术实现
+    - code_reviewer    # 代码审查
+    - tester           # 测试协作
+
+  output_format: code
+
+  requires_human_review: false  # 开发者的代码会由code_reviewer审查

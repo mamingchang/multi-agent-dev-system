@@ -1,6 +1,8 @@
 """
 Orchestrator
 协调器：管理整个工作流，协调各个Agent
+
+改进：使用Agent注册系统动态加载Agent
 """
 from typing import Dict, Any, List, Optional
 from .agents.base_agent import BaseAgent
@@ -11,6 +13,7 @@ from .agents.developer import DeveloperAgent
 from .agents.code_reviewer import CodeReviewerAgent
 from .agents.tester import TesterAgent
 from .agents.devops import DevOpsAgent
+from .agents.registration import AgentRegistration
 from .workflow.task import Task, TaskStatus
 from .session_manager import SessionManager, Session
 
@@ -18,25 +21,87 @@ from .session_manager import SessionManager, Session
 class Orchestrator:
     """协调器"""
 
-    def __init__(self, config: Dict[str, Any] = None, session_manager: SessionManager = None):
+    def __init__(self, config: Dict[str, Any] = None, session_manager: SessionManager = None, use_registration: bool = True):
+        """
+        初始化Orchestrator
+
+        Args:
+            config: 配置字典
+            session_manager: 会话管理器
+            use_registration: 是否使用Agent注册系统（默认True）
+        """
         self.config = config or {}
         self.agents: Dict[str, BaseAgent] = {}
         self.max_iterations = self.config.get('max_iterations', 10)
         self.session_manager = session_manager
         self.current_session: Optional[Session] = None
+        self.use_registration = use_registration
         self._initialize_agents()
 
     def _initialize_agents(self) -> None:
-        """初始化所有Agent"""
-        self.agents = {
-            'Requester': RequesterAgent(),
-            'ProductManager': ProductManagerAgent(),
-            'Architect': ArchitectAgent(),
-            'Developer': DeveloperAgent(),
-            'CodeReviewer': CodeReviewerAgent(),
-            'Tester': TesterAgent(),
-            'DevOps': DevOpsAgent(config={'environment': 'production'})
+        """
+        初始化所有Agent
+
+        如果use_registration=True，从注册系统加载Agent配置
+        否则使用硬编码的Agent实例（向后兼容）
+        """
+        if self.use_registration:
+            # 使用注册系统加载Agent
+            self._load_agents_from_registration()
+        else:
+            # 硬编码方式（向后兼容）
+            self.agents = {
+                'Requester': RequesterAgent(),
+                'ProductManager': ProductManagerAgent(),
+                'Architect': ArchitectAgent(),
+                'Developer': DeveloperAgent(),
+                'CodeReviewer': CodeReviewerAgent(),
+                'Tester': TesterAgent(),
+                'DevOps': DevOpsAgent(config={'environment': 'production'})
+            }
+
+    def _load_agents_from_registration(self) -> None:
+        """
+        从注册系统加载Agent
+
+        加载顺序：requester → product_manager → architect → developer → code_reviewer → tester → devops
+        """
+        registration = AgentRegistration()
+
+        # Agent名称映射（注册名 → 显示名）
+        agent_mapping = {
+            'requester': ('Requester', RequesterAgent),
+            'product_manager': ('ProductManager', ProductManagerAgent),
+            'architect': ('Architect', ArchitectAgent),
+            'developer': ('Developer', DeveloperAgent),
+            'code_reviewer': ('CodeReviewer', CodeReviewerAgent),
+            'tester': ('Tester', TesterAgent),
+            'devops': ('DevOps', DevOpsAgent)
         }
+
+        print("从注册系统加载Agent...")
+
+        for registered_name, (display_name, agent_class) in agent_mapping.items():
+            try:
+                # 加载Agent配置
+                config = registration.load_config(registered_name)
+
+                # 创建Agent实例（只传入name和config，不传role）
+                # Agent子类的__init__签名是: __init__(self, name: str = "...", config: Dict = None)
+                agent = agent_class(
+                    name=display_name,  # 使用显示名称
+                    config=config       # 传入完整配置（包含role等信息）
+                )
+
+                self.agents[display_name] = agent
+                print(f"  ✓ {display_name} ({config['role']}) - 已加载")
+
+            except Exception as e:
+                print(f"  ✗ {display_name} - 加载失败: {e}")
+                # 如果加载失败，使用默认实例
+                self.agents[display_name] = agent_class()
+
+        print(f"共加载 {len(self.agents)} 个Agent\n")
 
     def execute_workflow(self, task: Task, session: Session = None, auto_save: bool = True) -> Dict[str, Any]:
         """

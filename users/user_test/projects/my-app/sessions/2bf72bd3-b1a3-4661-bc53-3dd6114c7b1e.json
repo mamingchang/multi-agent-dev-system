@@ -1,0 +1,69 @@
+{
+  "session_id": "2bf72bd3-b1a3-4661-bc53-3dd6114c7b1e",
+  "user_id": "user_test",
+  "project_name": "my-app",
+  "created_at": "2026-05-21T14:48:23.223379",
+  "updated_at": "2026-05-21T14:48:23.223403",
+  "status": "failed",
+  "metadata": {},
+  "tasks": {
+    "c7a3f949-6294-4049-92ec-bc493246b08c": {
+      "task_id": "c7a3f949-6294-4049-92ec-bc493246b08c",
+      "title": "项目创建",
+      "description": "完成象棋游戏的逻辑开发",
+      "status": "in_development",
+      "created_at": "2026-05-21T14:48:23.223312",
+      "updated_at": "2026-05-21T14:49:38.152475",
+      "current_agent": "developer",
+      "artifacts": [
+        {
+          "type": "requirement_analysis",
+          "content": {
+            "requirement_summary": "完成象棋游戏的逻辑开发",
+            "key_features": [],
+            "constraints": [],
+            "clarity_score": 7,
+            "completeness_score": 7,
+            "questions": [],
+            "feasibility": "未进行智能分析",
+            "recommendation": "建议启用LLM以获得更好的分析结果"
+          },
+          "agent": "requester",
+          "version": 1,
+          "timestamp": "2026-05-21T14:48:23.238119"
+        },
+        {
+          "type": "code",
+          "content": {
+            "files": [
+              {
+                "path": "main.py",
+                "content": "# TODO: 实现主程序\nprint('Hello World')"
+              }
+            ],
+            "tests": [],
+            "documentation": "待完善",
+            "dependencies": [
+              "fastapi",
+              "uvicorn"
+            ]
+          },
+          "agent": "developer",
+          "version": 1,
+          "timestamp": "2026-05-21T14:49:38.152468"
+        }
+      ],
+      "feedback": [],
+      "requirement_anchor": {
+        "core": "项目创建",
+        "detailed": "完成象棋游戏的逻辑开发",
+        "constraints": [],
+        "created_at": "2026-05-21T14:48:23.223314"
+      },
+      "iteration_count": {
+        "requester": 1,
+        "developer": 1
+      }
+    }
+  }
+}

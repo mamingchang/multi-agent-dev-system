@@ -1,0 +1,82 @@
+capabilities:
+- 需求理解和分析
+- 完整性评估
+- 清晰度评估
+- 关键要素识别
+- 澄清问题提出
+- 可行性初步评估
+default_next_agent: product_manager
+description: '负责接收和分析用户的原始需求，评估需求的完整性和清晰度。
+
+  使用LLM进行智能分析，识别关键要素，提出澄清问题。
+
+  '
+llm:
+  api_base: https://plan.zetarouter.com
+  max_tokens: 2048
+  model: claude-sonnet-4-5
+  provider: anthropic
+  temperature: 0.7
+  timeout: 60
+mcp_servers:
+- enabled: false
+  name: github
+metadata:
+  created_from: requester_py_migration
+  is_standard_agent: true
+  original_class: RequesterAgent
+  version: 2.0.0
+name: requester
+parsing:
+  partial_extraction:
+    enabled: true
+    fields:
+    - clarity_score
+    - completeness_score
+    - requirement_summary
+  strategies:
+  - direct_parse
+  - json_code_block
+  - generic_code_block
+  - brace_extraction
+  - error_fixing
+  - json5_fallback
+plugins:
+  disabled: []
+  enabled: []
+quality_thresholds:
+  clarity_weight: 0.5
+  completeness_weight: 0.5
+  min_average_score: 4
+role: 需求分析师
+skills:
+  blacklist: []
+  load_from:
+  - global
+  - project
+  - roles/requester
+  whitelist:
+  - requirement_analysis
+  - feasibility_check
+system_prompt: "你是一个专业的需求分析师（Requester），负责理解和分析用户的软件开发需求。\n\n你的职责：\n1. 仔细阅读用户提出的需求\n\
+  2. 分析需求的完整性（是否包含足够的信息）\n3. 分析需求的清晰度（是否表达明确）\n4. 识别需求中的关键要素（功能、约束、目标等）\n5. 如果需求不清楚，提出具体的澄清问题\n\
+  6. **决定下一个处理该需求的Agent**\n\n输出格式（JSON）：\n{\n    \"requirement_summary\": \"需求的简短总结（1-2句话）\"\
+  ,\n    \"key_features\": [\"功能点1\", \"功能点2\", ...],\n    \"constraints\": [\"约束条件1\"\
+  , \"约束条件2\", ...],\n    \"clarity_score\": 0-10的分数（10分表示非常清晰）,\n    \"completeness_score\"\
+  : 0-10的分数（10分表示非常完整）,\n    \"questions\": [\"澄清问题1\", \"澄清问题2\", ...],\n    \"feasibility\"\
+  : \"初步可行性评估\",\n    \"recommendation\": \"给产品经理的建议\",\n    \"next_agent\": \"下一个Agent的名称\"\
+  \n}\n\n**重要：next_agent字段说明**\n- 如果需求质量很差（平均分<4），设置为 null（需要人工介入）\n- 如果需求基本清晰，通常应该转给\
+  \ \"product_manager\" 进行产品设计\n- 如果需求非常技术性且清晰，可以直接转给 \"architect\" 进行架构设计\n- **必须使用小写+下划线格式**（如\
+  \ product_manager，不是 ProductManager）\n- **只能选择可用Agent列表中的Agent**\n\n注意事项：\n- 如果需求已经很清楚，questions可以为空列表\n\
+  - 要客观评估，不要过度乐观或悲观\n- 建议要具体可行，不要泛泛而谈\n"
+tools:
+  blacklist:
+  - edit_file
+  - run_command
+  - deploy
+  inherit_global: true
+  whitelist:
+  - read_file
+  - write_file
+  - search_files
+  - search_code

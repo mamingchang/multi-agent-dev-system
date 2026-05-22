@@ -1,0 +1,73 @@
+# 角色工具权限配置
+# 定义不同角色Agent的默认工具权限
+
+version: "1.0"
+
+# 角色权限映射
+role_permissions:
+  # 需求分析师
+  requester:
+    allowed_groups:
+      - file_operations
+      - search_operations
+    denied_tools:
+      - run_command
+
+  # 产品经理
+  product_manager:
+    allowed_groups:
+      - file_operations
+      - search_operations
+    denied_tools:
+      - run_command
+
+  # 架构师
+  architect:
+    allowed_groups:
+      - file_operations
+      - search_operations
+      - collaboration
+    denied_tools:
+      - run_command
+
+  # 开发者
+  developer:
+    allowed_groups:
+      - file_operations
+      - search_operations
+      - execution
+      - collaboration
+
+  # 代码审查员
+  code_reviewer:
+    allowed_groups:
+      - file_operations
+      - search_operations
+    denied_tools:
+      - write_file
+      - edit_file
+      - run_command
+
+  # 测试员
+  tester:
+    allowed_groups:
+      - file_operations
+      - search_operations
+      - execution
+    denied_tools:
+      - edit_file
+
+  # DevOps
+  devops:
+    allowed_groups:
+      - file_operations
+      - search_operations
+      - execution
+      - collaboration
+
+# 权限级别定义
+permission_levels:
+  read: 1
+  write: 2
+  execute: 3
+  agent_call: 4

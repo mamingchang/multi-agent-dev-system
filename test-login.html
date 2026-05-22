@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test</title>
+</head>
+<body>
+    <h1>Login Test</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testLogin() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = 'Testing...';
+
+            try {
+                // Step 1: Login
+                const params = new URLSearchParams();
+                params.append('username', 'admin');
+                params.append('password', 'admin123');
+
+                const loginResponse = await fetch('http://localhost:8000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: params
+                });
+
+                const loginData = await loginResponse.json();
+                resultEl.textContent = 'Login Response:\n' + JSON.stringify(loginData, null, 2);
+
+                if (loginData.access_token) {
+                    // Step 2: Test accessing projects with token
+                    const projectsResponse = await fetch('http://localhost:8000/api/projects', {
+                        headers: {
+                            'Authorization': `Bearer ${loginData.access_token}`
+                        }
+                    });
+
+                    const projectsData = await projectsResponse.json();
+                    resultEl.textContent += '\n\nProjects Response:\n' + JSON.stringify(projectsData, null, 2);
+                }
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

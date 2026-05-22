@@ -1,0 +1,20 @@
+{
+  "task_id": "a7a1d736-2ad9-43e0-9ce6-0a9f924c8767",
+  "title": "测试系统",
+  "description": "测试Agent协作是否正常",
+  "status": "failed",
+  "created_at": "2026-05-21T15:59:45.900436",
+  "updated_at": "2026-05-21T17:07:05.670840",
+  "current_agent": null,
+  "artifacts": [],
+  "feedback": [],
+  "requirement_anchor": {
+    "core": "测试系统",
+    "detailed": "测试Agent协作是否正常",
+    "constraints": [],
+    "created_at": "2026-05-21T15:59:45.900442"
+  },
+  "iteration_count": {
+    "null": 1
+  }
+}

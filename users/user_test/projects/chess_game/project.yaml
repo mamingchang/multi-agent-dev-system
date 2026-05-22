@@ -1,0 +1,14 @@
+agents:
+- requester
+- product_manager
+- architect
+- developer
+created_at: '2026-05-22T14:37:13.506347'
+description: 单机象棋游戏 - 使用Multi-Agent系统开发
+owner: user_test
+project_id: chess_game
+project_name: chess_game
+settings: {}
+status: active
+tags: []
+updated_at: '2026-05-22T14:37:13.506347'

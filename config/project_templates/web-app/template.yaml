@@ -1,0 +1,5 @@
+name: Web应用模板
+description: 基础Web应用项目模板
+default_language: Python
+default_framework: Flask
+version: 1.0.0

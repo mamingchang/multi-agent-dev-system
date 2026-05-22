@@ -23,6 +23,7 @@ class TaskStatus(Enum):
     IN_DEPLOYMENT = "in_deployment"
     COMPLETED = "completed"
     REJECTED = "rejected"
+    FAILED = "failed"
 
 
 class Task:
@@ -243,6 +244,52 @@ class Task:
             result['conversation'] = self.conversation.to_dict()
 
         return result
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Task':
+        """
+        从字典创建Task对象
+
+        Args:
+            data: 任务数据字典
+
+        Returns:
+            Task: 任务对象
+        """
+        # 创建基础Task对象
+        task = cls(
+            task_id=data['task_id'],
+            title=data['title'],
+            description=data['description']
+        )
+
+        # 恢复状态
+        task.status = TaskStatus(data['status'])
+        task.current_agent = data.get('current_agent')
+
+        # 恢复时间戳
+        if 'created_at' in data:
+            task.created_at = datetime.fromisoformat(data['created_at'])
+        if 'updated_at' in data:
+            task.updated_at = datetime.fromisoformat(data['updated_at'])
+
+        # 恢复产物和反馈
+        task.artifacts = data.get('artifacts', [])
+        task.feedback = data.get('feedback', [])
+
+        # 恢复需求锚点
+        if 'requirement_anchor' in data:
+            task.requirement_anchor = data['requirement_anchor']
+
+        # 恢复迭代计数
+        task.iteration_count = data.get('iteration_count', {})
+
+        # 恢复对话系统（如果有）
+        if 'conversation' in data and task.conversation:
+            # 这里需要Conversation类支持from_dict，暂时跳过
+            pass
+
+        return task
 
     def __repr__(self):
         return f"<Task(id='{self.task_id}', status='{self.status.value}')>"

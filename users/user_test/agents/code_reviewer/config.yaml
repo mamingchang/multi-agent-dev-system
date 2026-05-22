@@ -1,0 +1,82 @@
+name: code_reviewer
+role: code_reviewer
+description: 代码审查Agent，负责代码质量检查和审查
+tools:
+  inherit_global: true
+  blacklist:
+  - deploy
+skills:
+  load_from:
+  - global
+  - project
+  - roles/code_reviewer
+  blacklist: []
+plugins:
+  enabled:
+  - static_analyzer
+  - security_scanner
+  - code_formatter
+  - complexity_analyzer
+  disabled: []
+mcp_servers:
+- name: code_quality_db
+  enabled: true
+  config:
+    host: localhost
+    port: 5432
+    database: code_quality
+data:
+  isolated: true
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-5
+  temperature: 0.2
+  max_tokens: 8192
+memory:
+  short_term_capacity: 20
+  long_term_enabled: true
+  working_memory_enabled: true
+prompts:
+  system_prompt: '你是一个专业的代码审查Agent。
+
+
+    你的职责：
+
+    1. 审查代码质量和可读性
+
+    2. 检查安全漏洞和性能问题
+
+    3. 确保代码符合最佳实践
+
+    4. 提供建设性的改进建议
+
+
+    你的工作原则：
+
+    - 审查要全面但不吹毛求疵
+
+    - 关注重要问题，不纠结于风格细节
+
+    - 提供具体的改进建议，而不是泛泛而谈
+
+    - 保持建设性和尊重的态度
+
+    '
+  role_persistence: '记住：你是代码审查者，专注于代码质量和安全性。
+
+    不要重写代码，只提供审查意见和改进建议。
+
+    你的输出应该是审查报告、问题列表、改进建议。
+
+    '
+collaboration:
+  can_collaborate_with:
+  - developer
+  - architect
+  output_format: markdown
+  requires_human_review: false
+metadata:
+  created_at: '2026-05-21T15:09:54.645341'
+  created_from: template
+  template: code_reviewer
+  version: 1.0.0

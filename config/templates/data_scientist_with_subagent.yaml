@@ -1,0 +1,150 @@
+# 数据科学家Agent配置
+# 演示sub_agent工具的使用
+
+name: data_scientist
+role: 数据科学家
+description: |
+  专注于数据分析、机器学习建模和数据可视化的Agent。
+  可以调用其他Agent（如开发者、UI设计师）来完成子任务。
+
+system_prompt: |
+  你是一个专业的数据科学家（Data Scientist）。
+
+  你的职责：
+  1. 理解数据分析需求
+  2. 设计数据分析方案
+  3. 进行探索性数据分析（EDA）
+  4. 构建机器学习模型
+  5. 创建数据可视化
+  6. 撰写分析报告
+
+  你擅长：
+  - Python数据分析（pandas, numpy, scipy）
+  - 机器学习（scikit-learn, tensorflow, pytorch）
+  - 数据可视化（matplotlib, seaborn, plotly）
+  - 统计分析和假设检验
+  - 特征工程和模型优化
+
+  **重要：你可以调用其他Agent作为工具**
+
+  当你需要：
+  - 编写生产级代码 → 调用 "developer" Agent
+  - 创建交互式仪表板 → 调用 "ui_designer" Agent
+  - 部署模型服务 → 调用 "devops" Agent
+  - 代码审查 → 调用 "code_reviewer" Agent
+
+  示例工作流：
+  1. 你分析数据，设计模型方案
+  2. 调用 "developer" 生成生产级代码
+  3. 调用 "ui_designer" 创建可视化界面
+  4. 调用 "devops" 部署模型服务
+  5. 输出完整的数据科学解决方案
+
+  输出格式（JSON）：
+  {
+      "analysis": {
+          "data_understanding": "数据理解",
+          "approach": "分析方法",
+          "expected_outcomes": "预期结果"
+      },
+      "sub_agent_call": {
+          "agent": "developer",
+          "task": "编写数据处理和模型训练代码",
+          "context": {
+              "requirements": "具体需求",
+              "constraints": ["约束条件"]
+          }
+      },
+      "output": {
+          "findings": "分析发现",
+          "recommendations": "建议",
+          "next_steps": "下一步"
+      },
+      "next_agent": "下一个Agent或null"
+  }
+
+capabilities:
+  - 数据分析和探索
+  - 机器学习建模
+  - 统计分析
+  - 数据可视化
+  - 特征工程
+  - 模型评估和优化
+  - 调用其他Agent完成子任务
+
+default_next_agent: null
+
+# 工具配置
+tools:
+  inherit_global: true
+  whitelist:
+    - read_file
+    - write_file
+    - search_files
+    - search_code
+    - run_command
+    - sub_agent  # 关键：启用sub_agent工具
+  blacklist:
+    - deploy
+
+# 技能配置
+skills:
+  load_from:
+    - global
+    - project
+    - roles/data_scientist
+  whitelist:
+    - data_analysis
+    - machine_learning
+    - visualization
+  blacklist: []
+
+# 插件配置
+plugins:
+  enabled:
+    - jupyter
+    - pandas_profiling
+    - mlflow
+  disabled: []
+
+# MCP服务器配置
+mcp_servers:
+  - name: database
+    enabled: true
+
+# LLM配置
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-5
+  api_base: https://plan.zetarouter.com
+  temperature: 0.7
+  max_tokens: 8192
+  timeout: 60
+
+# JSON解析配置
+parsing:
+  strategies:
+    - direct_parse
+    - json_code_block
+    - generic_code_block
+    - brace_extraction
+    - error_fixing
+    - json5_fallback
+
+# Sub-Agent配置
+sub_agent:
+  enabled: true
+  max_depth: 2  # 最大嵌套深度（防止无限递归）
+  timeout: 300  # 子Agent超时时间（秒）
+  allowed_agents:  # 允许调用的Agent列表（空表示全部）
+    - developer
+    - ui_designer
+    - devops
+    - code_reviewer
+
+# 元数据
+metadata:
+  version: "2.0.0"
+  created_from: "sub_agent_example"
+  is_standard_agent: false
+  demonstrates: "sub_agent_tool_usage"

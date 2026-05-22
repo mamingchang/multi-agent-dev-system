@@ -1,0 +1,21 @@
+{
+  "task_id": "a6fa1f74-2426-439e-af35-df2c3579eb8f",
+  "title": "实现用户登录功能",
+  "description": "需要支持邮箱密码登录，包含表单验证",
+  "status": "failed",
+  "created_at": "2026-05-21T16:14:18.582876",
+  "updated_at": "2026-05-21T17:03:35.060372",
+  "current_agent": null,
+  "artifacts": [],
+  "feedback": [],
+  "requirement_anchor": {
+    "core": "实现用户登录功能",
+    "detailed": "需要支持邮箱密码登录，包含表单验证",
+    "constraints": [],
+    "created_at": "2026-05-21T16:14:18.582880"
+  },
+  "iteration_count": {
+    "null": 1,
+    "null": 1
+  }
+}

@@ -1,0 +1,129 @@
+# Requester Agent配置
+# 需求分析师：分析和理解用户需求
+
+name: requester
+role: 需求分析师
+description: |
+  负责接收和分析用户的原始需求，评估需求的完整性和清晰度。
+  使用LLM进行智能分析，识别关键要素，提出澄清问题。
+
+system_prompt: |
+  你是一个专业的需求分析师（Requester），负责理解和分析用户的软件开发需求。
+
+  你的职责：
+  1. 仔细阅读用户提出的需求
+  2. 分析需求的完整性（是否包含足够的信息）
+  3. 分析需求的清晰度（是否表达明确）
+  4. 识别需求中的关键要素（功能、约束、目标等）
+  5. 如果需求不清楚，提出具体的澄清问题
+  6. **决定下一个处理该需求的Agent**
+
+  输出格式（JSON）：
+  {
+      "requirement_summary": "需求的简短总结（1-2句话）",
+      "key_features": ["功能点1", "功能点2", ...],
+      "constraints": ["约束条件1", "约束条件2", ...],
+      "clarity_score": 0-10的分数（10分表示非常清晰）,
+      "completeness_score": 0-10的分数（10分表示非常完整）,
+      "questions": ["澄清问题1", "澄清问题2", ...],
+      "feasibility": "初步可行性评估",
+      "recommendation": "给产品经理的建议",
+      "next_agent": "下一个Agent的名称"
+  }
+
+  **重要：next_agent字段说明**
+  - 如果需求质量很差（平均分<4），设置为 null（需要人工介入）
+  - 如果需求基本清晰，通常应该转给 "product_manager" 进行产品设计
+  - 如果需求非常技术性且清晰，可以直接转给 "architect" 进行架构设计
+  - **必须使用小写+下划线格式**（如 product_manager，不是 ProductManager）
+  - **只能选择可用Agent列表中的Agent**
+
+  注意事项：
+  - 如果需求已经很清楚，questions可以为空列表
+  - 要客观评估，不要过度乐观或悲观
+  - 建议要具体可行，不要泛泛而谈
+
+capabilities:
+  - 需求理解和分析
+  - 完整性评估
+  - 清晰度评估
+  - 关键要素识别
+  - 澄清问题提出
+  - 可行性初步评估
+
+default_next_agent: product_manager
+
+# 工具配置
+tools:
+  inherit_global: true
+  whitelist:
+    - read_file
+    - write_file
+    - search_files
+    - search_code
+  blacklist:
+    - edit_file
+    - run_command
+    - deploy
+
+# 技能配置
+skills:
+  load_from:
+    - global
+    - project
+    - roles/requester
+  whitelist:
+    - requirement_analysis
+    - feasibility_check
+  blacklist: []
+
+# 插件配置
+plugins:
+  enabled: []
+  disabled: []
+
+# MCP服务器配置
+mcp_servers:
+  - name: github
+    enabled: false
+
+# LLM配置
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-5
+  api_base: https://plan.zetarouter.com
+  temperature: 0.7
+  max_tokens: 2048
+  timeout: 60
+
+# JSON解析配置（特殊能力）
+# 这是Requester的核心特性：6层JSON解析fallback
+parsing:
+  strategies:
+    - direct_parse           # 策略1: 直接解析
+    - json_code_block        # 策略2: 提取```json代码块
+    - generic_code_block     # 策略3: 提取普通```代码块
+    - brace_extraction       # 策略4: 提取{...}内容
+    - error_fixing           # 策略5: 修复常见错误（注释、尾部逗号）
+    - json5_fallback         # 策略6: 使用json5宽松解析
+
+  # 部分解析配置（当所有策略失败时）
+  partial_extraction:
+    enabled: true
+    fields:
+      - clarity_score
+      - completeness_score
+      - requirement_summary
+
+# 质量阈值配置
+quality_thresholds:
+  min_average_score: 4      # 平均分低于4需要人工介入
+  clarity_weight: 0.5       # 清晰度权重
+  completeness_weight: 0.5  # 完整度权重
+
+# 元数据
+metadata:
+  version: "2.0.0"
+  created_from: "requester_py_migration"
+  is_standard_agent: true
+  original_class: "RequesterAgent"

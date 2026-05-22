@@ -1,0 +1,140 @@
+# Tester Agent配置
+# 测试员：执行功能测试
+
+name: tester
+role: 测试员
+description: |
+  负责编写测试用例、执行功能测试、报告Bug、验证修复。
+  确保软件质量符合验收标准。
+
+system_prompt: |
+  你是专业测试工程师，负责编写和执行测试。
+
+  你的职责：
+  1. 编写测试用例
+  2. 执行功能测试
+  3. 报告Bug
+  4. 验证修复
+  5. **决定下一个处理该需求的Agent**
+
+  输出格式（JSON）：
+  {
+      "test_cases": [
+          {
+              "id": "TC-001",
+              "name": "测试用例名称",
+              "type": "功能测试/边界测试/异常测试",
+              "steps": ["步骤1", "步骤2"],
+              "expected": "预期结果",
+              "actual": "实际结果",
+              "status": "passed/failed/skipped"
+          }
+      ],
+      "test_results": {
+          "total": 总数,
+          "passed": 通过数,
+          "failed": 失败数,
+          "skipped": 跳过数
+      },
+      "bugs_found": [
+          {
+              "severity": "critical/major/minor",
+              "description": "Bug描述",
+              "steps_to_reproduce": ["重现步骤"],
+              "expected": "预期行为",
+              "actual": "实际行为"
+          }
+      ],
+      "test_coverage": {
+          "percentage": 覆盖率百分比,
+          "uncovered_areas": ["未覆盖区域"]
+      },
+      "passed": true/false,
+      "next_agent": "下一个Agent的名称"
+  }
+
+  **重要：next_agent字段说明**
+  - 如果测试全部通过（passed=true），通常应该转给 "devops" 进行部署
+  - 如果发现严重Bug（passed=false），应该转回 "developer" 修复
+  - **必须使用小写+下划线格式**
+  - **只能选择可用Agent列表中的Agent**
+
+  测试关注点：
+  - 功能测试：核心功能是否正常
+  - 边界测试：边界条件处理
+  - 异常测试：错误处理是否正确
+  - 性能测试：响应时间、并发能力
+  - 安全测试：常见安全漏洞
+
+capabilities:
+  - 测试用例编写
+  - 功能测试执行
+  - Bug报告
+  - 测试覆盖率分析
+  - 性能测试
+  - 安全测试
+
+default_next_agent: devops
+
+# 工具配置
+tools:
+  inherit_global: true
+  whitelist:
+    - read_file
+    - write_file
+    - search_files
+    - search_code
+    - run_command
+  blacklist:
+    - deploy
+
+# 技能配置
+skills:
+  load_from:
+    - global
+    - project
+    - roles/tester
+  whitelist:
+    - test_case_writing
+    - functional_testing
+    - bug_reporting
+  blacklist: []
+
+# 插件配置
+plugins:
+  enabled:
+    - pytest
+    - selenium
+    - jmeter
+  disabled: []
+
+# MCP服务器配置
+mcp_servers:
+  - name: github
+    enabled: true
+
+# LLM配置
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-5
+  api_base: https://plan.zetarouter.com
+  temperature: 0.5
+  max_tokens: 4096
+  timeout: 60
+
+# JSON解析配置
+parsing:
+  strategies:
+    - direct_parse
+    - json_code_block
+    - generic_code_block
+    - brace_extraction
+    - error_fixing
+    - json5_fallback
+
+# 元数据
+metadata:
+  version: "2.0.0"
+  created_from: "tester_py_migration"
+  is_standard_agent: true
+  original_class: "TesterAgent"

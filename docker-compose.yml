@@ -11,7 +11,7 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=sqlite:////app/data/multi_agent_dev.db
-      - SECRET_KEY=docker-dev-secret-key-change-in-production
+      - SECRET_KEY=3aiAtMWBEPnRtHIIDyZU-qVH5apaHub5y0cRSCqvT4E
       - ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
       - BACKEND_HOST=0.0.0.0

@@ -1,0 +1,128 @@
+# CodeReviewer Agent配置
+# 代码审查员：审查代码质量
+
+name: code_reviewer
+role: 代码审查员
+description: |
+  负责审查代码规范、检查潜在Bug、评估代码质量。
+  提出改进建议，确保代码符合最佳实践。
+
+system_prompt: |
+  你是资深代码审查员，负责审查代码质量。
+
+  你的职责：
+  1. 审查代码规范
+  2. 检查潜在Bug
+  3. 评估代码质量
+  4. 提出改进建议
+  5. **决定下一个处理该需求的Agent**
+
+  输出格式（JSON）：
+  {
+      "overall_quality": 0-10的评分,
+      "issues": [
+          {
+              "severity": "critical/major/minor",
+              "file": "文件路径",
+              "line": 行号,
+              "description": "问题描述",
+              "suggestion": "改进建议"
+          }
+      ],
+      "suggestions": [
+          {
+              "category": "性能/安全/可读性/可维护性",
+              "description": "建议描述",
+              "priority": "high/medium/low"
+          }
+      ],
+      "approved": true/false,
+      "next_agent": "下一个Agent的名称"
+  }
+
+  **重要：next_agent字段说明**
+  - 如果代码通过审查（approved=true），通常应该转给 "tester" 进行测试
+  - 如果代码有严重问题（approved=false），应该转回 "developer" 修复
+  - **必须使用小写+下划线格式**
+  - **只能选择可用Agent列表中的Agent**
+
+  审查重点：
+  - 代码规范：命名、格式、注释
+  - 潜在Bug：空指针、边界条件、异常处理
+  - 性能问题：算法复杂度、资源泄漏
+  - 安全漏洞：SQL注入、XSS、认证授权
+  - 可维护性：代码复杂度、重复代码
+
+capabilities:
+  - 代码规范审查
+  - Bug检测
+  - 性能分析
+  - 安全审计
+  - 可维护性评估
+  - 最佳实践建议
+
+default_next_agent: tester
+
+# 工具配置
+tools:
+  inherit_global: true
+  whitelist:
+    - read_file
+    - search_files
+    - search_code
+  blacklist:
+    - write_file
+    - edit_file
+    - run_command
+    - deploy
+
+# 技能配置
+skills:
+  load_from:
+    - global
+    - project
+    - roles/code_reviewer
+  whitelist:
+    - code_review
+    - security_audit
+    - performance_analysis
+  blacklist: []
+
+# 插件配置
+plugins:
+  enabled:
+    - sonarqube
+    - eslint
+    - pylint
+  disabled: []
+
+# MCP服务器配置
+mcp_servers:
+  - name: github
+    enabled: true
+
+# LLM配置
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-5
+  api_base: https://plan.zetarouter.com
+  temperature: 0.3
+  max_tokens: 4096
+  timeout: 60
+
+# JSON解析配置
+parsing:
+  strategies:
+    - direct_parse
+    - json_code_block
+    - generic_code_block
+    - brace_extraction
+    - error_fixing
+    - json5_fallback
+
+# 元数据
+metadata:
+  version: "2.0.0"
+  created_from: "code_reviewer_py_migration"
+  is_standard_agent: true
+  original_class: "CodeReviewerAgent"

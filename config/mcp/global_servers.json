@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "description": "全局MCP服务器配置",
+  "servers": {
+    "filesystem": {
+      "enabled": true,
+      "transport": "stdio",
+      "command": "/home/mamingchang/.nvm/versions/node/v20.20.2/bin/npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/mamingchang/multi-agent-dev-system"
+      ],
+      "description": "文件系统操作服务器",
+      "tags": ["file", "local"]
+    },
+    "git": {
+      "enabled": true,
+      "transport": "stdio",
+      "command": "/home/mamingchang/.nvm/versions/node/v20.20.2/bin/npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git",
+        "--repository",
+        "/home/mamingchang/multi-agent-dev-system"
+      ],
+      "description": "Git版本控制服务器",
+      "tags": ["git", "local"]
+    },
+    "sqlite": {
+      "enabled": false,
+      "transport": "stdio",
+      "command": "/home/mamingchang/.nvm/versions/node/v20.20.2/bin/npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "--db-path",
+        "/home/mamingchang/multi-agent-dev-system/data/app.db"
+      ],
+      "description": "SQLite数据库服务器",
+      "tags": ["database", "local"]
+    },
+    "github": {
+      "enabled": false,
+      "transport": "stdio",
+      "command": "/home/mamingchang/.nvm/versions/node/v20.20.2/bin/npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub API服务器（需要较长启动时间，暂时禁用）",
+      "tags": ["github", "remote", "api"]
+    },
+    "slack": {
+      "enabled": false,
+      "transport": "http",
+      "url": "https://slack.com/api/mcp",
+      "auth": {
+        "type": "bearer",
+        "token": "YOUR_SLACK_TOKEN_HERE"
+      },
+      "description": "Slack消息服务器",
+      "tags": ["slack", "remote", "api"]
+    },
+    "custom_remote": {
+      "enabled": false,
+      "transport": "http",
+      "url": "https://your-mcp-server.com",
+      "headers": {
+        "X-Custom-Header": "value"
+      },
+      "auth": {
+        "type": "api_key",
+        "key_name": "X-API-Key",
+        "token": "YOUR_API_KEY_HERE"
+      },
+      "timeout": 60,
+      "description": "自定义远程MCP服务器",
+      "tags": ["custom", "remote"]
+    }
+  },
+  "notes": [
+    "MCP服务器通过npx自动下载和运行（stdio类型）",
+    "stdio传输协议适用于本地服务器",
+    "http传输协议适用于远程服务器（需要配置认证）",
+    "sse传输协议已弃用，推荐使用http",
+    "服务器启动失败会跳过并输出WARNING",
+    "可以通过enabled字段禁用服务器",
+    "远程服务器需要配置auth认证信息"
+  ]
+}

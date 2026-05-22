@@ -1,0 +1,91 @@
+# 全局工具配置
+# 定义系统中所有可用的工具
+
+version: "1.0"
+
+# 工具列表
+tools:
+  # 文件操作工具
+  - name: read_file
+    enabled: true
+    description: "读取文件内容"
+    permission_level: read
+    dangerous: false
+    tags:
+      - file
+      - read
+
+  - name: write_file
+    enabled: true
+    description: "写入文件内容"
+    permission_level: write
+    dangerous: false
+    tags:
+      - file
+      - write
+
+  - name: edit_file
+    enabled: true
+    description: "编辑文件内容（精确替换）"
+    permission_level: write
+    dangerous: false
+    tags:
+      - file
+      - write
+      - edit
+
+  # 搜索工具
+  - name: search_files
+    enabled: true
+    description: "搜索文件（通配符模式）"
+    permission_level: read
+    dangerous: false
+    tags:
+      - search
+      - file
+
+  - name: search_code
+    enabled: true
+    description: "搜索代码（正则表达式）"
+    permission_level: read
+    dangerous: false
+    tags:
+      - search
+      - code
+
+  # Shell工具
+  - name: run_command
+    enabled: true
+    description: "执行Shell命令"
+    permission_level: execute
+    dangerous: true
+    tags:
+      - shell
+      - execute
+
+  # 协作工具
+  - name: sub_agent
+    enabled: true
+    description: "调用其他Agent处理子任务"
+    permission_level: agent_call
+    dangerous: false
+    tags:
+      - agent
+      - collaboration
+
+# 工具分组
+tool_groups:
+  file_operations:
+    - read_file
+    - write_file
+    - edit_file
+
+  search_operations:
+    - search_files
+    - search_code
+
+  execution:
+    - run_command
+
+  collaboration:
+    - sub_agent

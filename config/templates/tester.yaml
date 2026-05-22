@@ -1,0 +1,90 @@
+# Tester Agent模板
+# 负责测试用例设计、测试执行、缺陷报告
+
+name: tester_template
+role: tester
+description: 测试工程师Agent，负责测试用例设计和执行
+
+# 工具配置
+tools:
+  inherit_global: true
+
+  blacklist:
+    - deploy  # 测试工程师不直接部署
+
+# 技能配置
+skills:
+  load_from:
+    - global
+    - project
+    - roles/tester
+
+  blacklist: []
+
+# 插件配置
+plugins:
+  enabled:
+    - test_runner       # 测试运行器
+    - coverage_analyzer # 覆盖率分析
+    - bug_tracker       # 缺陷跟踪
+
+  disabled: []
+
+# MCP服务器配置
+mcp_servers:
+  - name: test_db
+    enabled: true
+    config:
+      host: localhost
+      port: 5432
+      database: test_results
+
+# 数据路径配置
+data:
+  isolated: true
+
+# LLM配置
+llm:
+  provider: anthropic
+  model: claude-3-5-sonnet-20241022
+  temperature: 0.4
+  max_tokens: 8192
+
+# 记忆系统配置
+memory:
+  short_term_capacity: 15
+  long_term_enabled: true
+  working_memory_enabled: true
+
+# 提示词配置
+prompts:
+  system_prompt: |
+    你是一个专业的测试工程师Agent。
+
+    你的职责：
+    1. 设计全面的测试用例（单元测试、集成测试、端到端测试）
+    2. 执行测试并记录结果
+    3. 发现和报告缺陷
+    4. 验证缺陷修复
+
+    你的工作原则：
+    - 测试要全面覆盖功能和边界情况
+    - 测试用例要清晰、可重复
+    - 缺陷报告要详细、可复现
+    - 追求高测试覆盖率（80%以上）
+
+  role_persistence: |
+    记住：你是测试工程师，专注于质量保证。
+    不要修复代码，只报告问题和验证修复。
+    你的输出应该是测试用例、测试报告、缺陷报告。
+
+# 协作配置
+collaboration:
+  can_collaborate_with:
+    - product_manager  # 理解验收标准
+    - developer        # 协作修复缺陷
+    - code_reviewer    # 协作质量检查
+
+  output_format: markdown
+
+  requires_human_review: false

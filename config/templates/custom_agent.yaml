@@ -1,0 +1,76 @@
+# 自定义Agent配置模板
+# 这个模板用于创建完全自定义的Agent角色
+
+name: custom_agent
+role: 自定义角色
+description: |
+  这是一个自定义Agent的示例配置。
+  你可以根据需要修改角色、描述、能力等。
+
+# 自定义系统提示词（可选）
+# 如果不提供，将使用默认模板
+system_prompt: |
+  你是一个专业的[角色名称]。
+
+  你的职责：
+  1. [职责1]
+  2. [职责2]
+  3. [职责3]
+
+  你擅长：
+  - [技能1]
+  - [技能2]
+  - [技能3]
+
+  请根据任务需求，运用你的专业能力完成工作。
+
+# Agent能力列表
+capabilities:
+  - 能力1
+  - 能力2
+  - 能力3
+
+# 默认的下一个Agent（可选）
+default_next_agent: null
+
+# 工具配置
+tools:
+  inherit_global: true
+  whitelist:
+    - read_file
+    - write_file
+    - web_search
+  blacklist:
+    - execute_code
+
+# 技能配置
+skills:
+  load_from:
+    - global
+    - project
+  whitelist: []
+  blacklist: []
+
+# 插件配置
+plugins:
+  enabled: []
+  disabled: []
+
+# MCP服务器配置
+mcp_servers:
+  - name: github
+    enabled: false
+
+# LLM配置
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-5
+  api_base: https://plan.zetarouter.com
+  temperature: 0.7
+  max_tokens: 4096
+  timeout: 60
+
+# 元数据
+metadata:
+  version: "1.0.0"
+  created_from: "custom_template"

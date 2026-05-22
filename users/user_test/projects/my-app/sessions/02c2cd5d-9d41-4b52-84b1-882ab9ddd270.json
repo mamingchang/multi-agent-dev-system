@@ -1,0 +1,110 @@
+{
+  "session_id": "02c2cd5d-9d41-4b52-84b1-882ab9ddd270",
+  "user_id": "user_test",
+  "project_name": "my-app",
+  "created_at": "2026-05-21T15:24:37.637416",
+  "updated_at": "2026-05-21T15:24:37.637429",
+  "status": "failed",
+  "metadata": {},
+  "tasks": {
+    "afd2efa6-9b51-41f7-a27d-58b998fe9fd1": {
+      "task_id": "afd2efa6-9b51-41f7-a27d-58b998fe9fd1",
+      "title": "开发象棋逻辑和界面",
+      "description": "开发象棋逻辑和界面",
+      "status": "in_design",
+      "created_at": "2026-05-21T15:24:37.637360",
+      "updated_at": "2026-05-21T15:24:58.930953",
+      "current_agent": "product_manager",
+      "artifacts": [
+        {
+          "type": "requirement_analysis",
+          "content": {
+            "requirement_summary": "开发象棋逻辑和界面",
+            "key_features": [],
+            "constraints": [],
+            "clarity_score": 7,
+            "completeness_score": 7,
+            "questions": [],
+            "feasibility": "未进行智能分析",
+            "recommendation": "建议启用LLM以获得更好的分析结果"
+          },
+          "agent": "requester",
+          "version": 1,
+          "timestamp": "2026-05-21T15:24:37.669454"
+        },
+        {
+          "type": "prd",
+          "content": {
+            "product_overview": {
+              "title": "开发象棋逻辑和界面",
+              "description": "开发象棋逻辑和界面",
+              "target_users": [
+                "待定义"
+              ],
+              "business_value": "待分析"
+            },
+            "user_stories": [
+              {
+                "as_a": "用户",
+                "i_want": "使用系统",
+                "so_that": "完成任务",
+                "priority": "high"
+              }
+            ],
+            "functional_requirements": [
+              {
+                "id": "FR-001",
+                "title": "基础功能",
+                "description": "开发象棋逻辑和界面",
+                "priority": "P0",
+                "user_story_ref": "待关联"
+              }
+            ],
+            "non_functional_requirements": {
+              "performance": "待定义",
+              "security": "需要身份验证",
+              "scalability": "待评估",
+              "usability": "待设计"
+            },
+            "user_interface": {
+              "key_pages": [
+                "待设计"
+              ],
+              "navigation": "待规划",
+              "interaction": "待定义"
+            },
+            "acceptance_criteria": [
+              "功能正常运行",
+              "通过测试"
+            ],
+            "risks_and_assumptions": {
+              "risks": [
+                "未进行详细分析"
+              ],
+              "assumptions": [
+                "基于初步需求"
+              ]
+            },
+            "success_metrics": [
+              "待定义"
+            ]
+          },
+          "agent": "product_manager",
+          "version": 1,
+          "timestamp": "2026-05-21T15:24:58.930945"
+        }
+      ],
+      "feedback": [],
+      "requirement_anchor": {
+        "core": "开发象棋逻辑和界面",
+        "detailed": "开发象棋逻辑和界面",
+        "constraints": [],
+        "created_at": "2026-05-21T15:24:37.637363"
+      },
+      "iteration_count": {
+        "requester": 1,
+        "product_manager": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,408 @@
+{
+  "version": "1.0",
+  "tools": {
+    "read_file": {
+      "name": "read_file",
+      "display_name": "读取文件",
+      "description": "读取文件内容",
+      "type": "builtin",
+      "class_path": "src.tools.file_tools.ReadTool",
+      "permission_level": "read",
+      "dangerous": false,
+      "enabled": true,
+      "tags": [
+        "file",
+        "read"
+      ],
+      "author": "system",
+      "created_at": "2026-05-22T10:38:35.345872",
+      "updated_at": "2026-05-22T10:38:35.345889"
+    },
+    "write_file": {
+      "name": "write_file",
+      "display_name": "写入文件",
+      "description": "写入文件内容",
+      "type": "builtin",
+      "class_path": "src.tools.file_tools.WriteTool",
+      "permission_level": "write",
+      "dangerous": false,
+      "enabled": true,
+      "tags": [
+        "file",
+        "write"
+      ],
+      "author": "system",
+      "created_at": "2026-05-22T10:38:35.346123",
+      "updated_at": "2026-05-22T10:38:35.346128"
+    },
+    "edit_file": {
+      "name": "edit_file",
+      "display_name": "编辑文件",
+      "description": "编辑文件内容（精确替换）",
+      "type": "builtin",
+      "class_path": "src.tools.file_tools.EditTool",
+      "permission_level": "write",
+      "dangerous": false,
+      "enabled": true,
+      "tags": [
+        "file",
+        "write",
+        "edit"
+      ],
+      "author": "system",
+      "created_at": "2026-05-22T10:38:35.346412",
+      "updated_at": "2026-05-22T10:38:35.346418"
+    },
+    "search_files": {
+      "name": "search_files",
+      "display_name": "搜索文件",
+      "description": "搜索文件（通配符模式）",
+      "type": "builtin",
+      "class_path": "src.tools.search_tools.GlobTool",
+      "permission_level": "read",
+      "dangerous": false,
+      "enabled": true,
+      "tags": [
+        "search",
+        "file"
+      ],
+      "author": "system",
+      "created_at": "2026-05-22T10:38:35.347029",
+      "updated_at": "2026-05-22T10:38:35.347036"
+    },
+    "search_code": {
+      "name": "search_code",
+      "display_name": "搜索代码",
+      "description": "搜索代码（正则表达式）",
+      "type": "builtin",
+      "class_path": "src.tools.search_tools.GrepTool",
+      "permission_level": "read",
+      "dangerous": false,
+      "enabled": true,
+      "tags": [
+        "search",
+        "code"
+      ],
+      "author": "system",
+      "created_at": "2026-05-22T10:38:35.347553",
+      "updated_at": "2026-05-22T10:38:35.347559"
+    },
+    "run_command": {
+      "name": "run_command",
+      "display_name": "执行命令",
+      "description": "执行Shell命令",
+      "type": "builtin",
+      "class_path": "src.tools.shell_tools.BashTool",
+      "permission_level": "execute",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "shell",
+        "execute"
+      ],
+      "author": "system",
+      "created_at": "2026-05-22T10:38:35.347945",
+      "updated_at": "2026-05-22T10:38:35.347950"
+    },
+    "sub_agent": {
+      "name": "sub_agent",
+      "display_name": "调用子Agent",
+      "description": "调用其他Agent处理子任务",
+      "type": "builtin",
+      "class_path": "src.tools.sub_agent_tool.SubAgentTool",
+      "permission_level": "agent_call",
+      "dangerous": false,
+      "enabled": true,
+      "tags": [
+        "agent",
+        "collaboration"
+      ],
+      "author": "system",
+      "created_at": "2026-05-22T10:38:35.348358",
+      "updated_at": "2026-05-22T10:38:35.348363"
+    },
+    "mcp__filesystem__read_file": {
+      "name": "mcp__filesystem__read_file",
+      "display_name": "mcp__filesystem__read_file",
+      "description": "[MCP:filesystem] Read the complete contents of a file as text. DEPRECATED: Use read_text_file instead.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.read_file",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "read_file",
+      "created_at": "2026-05-22T11:42:44.231846",
+      "updated_at": "2026-05-22T11:42:44.231861"
+    },
+    "mcp__filesystem__read_text_file": {
+      "name": "mcp__filesystem__read_text_file",
+      "display_name": "mcp__filesystem__read_text_file",
+      "description": "[MCP:filesystem] Read the complete contents of a file from the file system as text. Handles various text encodings and provides detailed error messages if the file cannot be read. Use this tool when you need to examine the contents of a single file. Use the 'head' parameter to read only the first N lines of a file, or the 'tail' parameter to read only the last N lines of a file. Operates on the file as text regardless of extension. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.read_text_file",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "read_text_file",
+      "created_at": "2026-05-22T11:42:44.232398",
+      "updated_at": "2026-05-22T11:42:44.232404"
+    },
+    "mcp__filesystem__read_media_file": {
+      "name": "mcp__filesystem__read_media_file",
+      "display_name": "mcp__filesystem__read_media_file",
+      "description": "[MCP:filesystem] Read an image or audio file. Returns the base64 encoded data and MIME type. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.read_media_file",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "read_media_file",
+      "created_at": "2026-05-22T11:42:44.233073",
+      "updated_at": "2026-05-22T11:42:44.233078"
+    },
+    "mcp__filesystem__read_multiple_files": {
+      "name": "mcp__filesystem__read_multiple_files",
+      "display_name": "mcp__filesystem__read_multiple_files",
+      "description": "[MCP:filesystem] Read the contents of multiple files simultaneously. This is more efficient than reading files one by one when you need to analyze or compare multiple files. Each file's content is returned with its path as a reference. Failed reads for individual files won't stop the entire operation. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.read_multiple_files",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "read_multiple_files",
+      "created_at": "2026-05-22T11:42:44.233584",
+      "updated_at": "2026-05-22T11:42:44.233590"
+    },
+    "mcp__filesystem__write_file": {
+      "name": "mcp__filesystem__write_file",
+      "display_name": "mcp__filesystem__write_file",
+      "description": "[MCP:filesystem] Create a new file or completely overwrite an existing file with new content. Use with caution as it will overwrite existing files without warning. Handles text content with proper encoding. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.write_file",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "write_file",
+      "created_at": "2026-05-22T11:42:44.234034",
+      "updated_at": "2026-05-22T11:42:44.234039"
+    },
+    "mcp__filesystem__edit_file": {
+      "name": "mcp__filesystem__edit_file",
+      "display_name": "mcp__filesystem__edit_file",
+      "description": "[MCP:filesystem] Make line-based edits to a text file. Each edit replaces exact line sequences with new content. Returns a git-style diff showing the changes made. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.edit_file",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "edit_file",
+      "created_at": "2026-05-22T11:42:44.234530",
+      "updated_at": "2026-05-22T11:42:44.234534"
+    },
+    "mcp__filesystem__create_directory": {
+      "name": "mcp__filesystem__create_directory",
+      "display_name": "mcp__filesystem__create_directory",
+      "description": "[MCP:filesystem] Create a new directory or ensure a directory exists. Can create multiple nested directories in one operation. If the directory already exists, this operation will succeed silently. Perfect for setting up directory structures for projects or ensuring required paths exist. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.create_directory",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "create_directory",
+      "created_at": "2026-05-22T11:42:44.235006",
+      "updated_at": "2026-05-22T11:42:44.235010"
+    },
+    "mcp__filesystem__list_directory": {
+      "name": "mcp__filesystem__list_directory",
+      "display_name": "mcp__filesystem__list_directory",
+      "description": "[MCP:filesystem] Get a detailed listing of all files and directories in a specified path. Results clearly distinguish between files and directories with [FILE] and [DIR] prefixes. This tool is essential for understanding directory structure and finding specific files within a directory. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.list_directory",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "list_directory",
+      "created_at": "2026-05-22T11:42:44.235506",
+      "updated_at": "2026-05-22T11:42:44.235510"
+    },
+    "mcp__filesystem__list_directory_with_sizes": {
+      "name": "mcp__filesystem__list_directory_with_sizes",
+      "display_name": "mcp__filesystem__list_directory_with_sizes",
+      "description": "[MCP:filesystem] Get a detailed listing of all files and directories in a specified path, including sizes. Results clearly distinguish between files and directories with [FILE] and [DIR] prefixes. This tool is useful for understanding directory structure and finding specific files within a directory. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.list_directory_with_sizes",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "list_directory_with_sizes",
+      "created_at": "2026-05-22T11:42:44.235985",
+      "updated_at": "2026-05-22T11:42:44.235989"
+    },
+    "mcp__filesystem__directory_tree": {
+      "name": "mcp__filesystem__directory_tree",
+      "display_name": "mcp__filesystem__directory_tree",
+      "description": "[MCP:filesystem] Get a recursive tree view of files and directories as a JSON structure. Each entry includes 'name', 'type' (file/directory), and 'children' for directories. Files have no children array, while directories always have a children array (which may be empty). The output is formatted with 2-space indentation for readability. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.directory_tree",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "directory_tree",
+      "created_at": "2026-05-22T11:42:44.236527",
+      "updated_at": "2026-05-22T11:42:44.236531"
+    },
+    "mcp__filesystem__move_file": {
+      "name": "mcp__filesystem__move_file",
+      "display_name": "mcp__filesystem__move_file",
+      "description": "[MCP:filesystem] Move or rename files and directories. Can move files between directories and rename them in a single operation. If the destination exists, the operation will fail. Works across different directories and can be used for simple renaming within the same directory. Both source and destination must be within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.move_file",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "move_file",
+      "created_at": "2026-05-22T11:42:44.237030",
+      "updated_at": "2026-05-22T11:42:44.237034"
+    },
+    "mcp__filesystem__search_files": {
+      "name": "mcp__filesystem__search_files",
+      "display_name": "mcp__filesystem__search_files",
+      "description": "[MCP:filesystem] Recursively search for files and directories matching a pattern. The patterns should be glob-style patterns that match paths relative to the working directory. Use pattern like '*.ext' to match files in current directory, and '**/*.ext' to match files in all subdirectories. Returns full paths to all matching items. Great for finding files when you don't know their exact location. Only searches within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.search_files",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "search_files",
+      "created_at": "2026-05-22T11:42:44.237668",
+      "updated_at": "2026-05-22T11:42:44.237678"
+    },
+    "mcp__filesystem__get_file_info": {
+      "name": "mcp__filesystem__get_file_info",
+      "display_name": "mcp__filesystem__get_file_info",
+      "description": "[MCP:filesystem] Retrieve detailed metadata about a file or directory. Returns comprehensive information including size, creation time, last modified time, permissions, and type. This tool is perfect for understanding file characteristics without reading the actual content. Only works within allowed directories.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.get_file_info",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "get_file_info",
+      "created_at": "2026-05-22T11:42:44.238281",
+      "updated_at": "2026-05-22T11:42:44.238289"
+    },
+    "mcp__filesystem__list_allowed_directories": {
+      "name": "mcp__filesystem__list_allowed_directories",
+      "display_name": "mcp__filesystem__list_allowed_directories",
+      "description": "[MCP:filesystem] Returns the list of directories that this server is allowed to access. Subdirectories within these allowed directories are also accessible. Use this to understand which directories and their nested paths are available before trying to access files.",
+      "type": "mcp",
+      "class_path": "mcp.filesystem.list_allowed_directories",
+      "permission_level": "write",
+      "dangerous": true,
+      "enabled": true,
+      "tags": [
+        "mcp",
+        "filesystem"
+      ],
+      "author": "mcp",
+      "mcp_server": "filesystem",
+      "mcp_tool": "list_allowed_directories",
+      "created_at": "2026-05-22T11:42:44.238861",
+      "updated_at": "2026-05-22T11:42:44.238866"
+    }
+  },
+  "tool_groups": {
+    "file_operations": [
+      "read_file",
+      "write_file",
+      "edit_file"
+    ],
+    "search_operations": [
+      "search_files",
+      "search_code"
+    ],
+    "execution": [
+      "run_command"
+    ],
+    "collaboration": [
+      "sub_agent"
+    ]
+  }
+}

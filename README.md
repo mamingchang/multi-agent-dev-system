@@ -1,81 +1,98 @@
-# 🤖 多Agent自动化开发协作平台
+# Multi-Agent Dev System
 
-> AI驱动的全流程自动化软件开发系统
+AI驱动的自动化软件开发协作平台 - 让7个专业Agent协作完成从需求到部署的全流程开发。
 
-[![完成度](https://img.shields.io/badge/完成度-95%25-brightgreen)]()
-[![功能](https://img.shields.io/badge/功能-19/20-blue)]()
-[![测试](https://img.shields.io/badge/测试-120+场景-success)]()
-[![生产就绪](https://img.shields.io/badge/生产就绪-✓-green)]()
+## ✨ 核心特性
 
-## 📖 项目简介
+### 🏗️ 三层隔离架构
+- **用户层**：每个用户独立命名空间，完全隔离
+- **Agent层**：Agent属于用户，配置完全可定制
+- **项目层**：项目完全隔离，独立的workspace和记忆
 
-这是一个完整的企业级AI开发协作平台，通过7个专业AI Agent协同工作，实现从需求到部署的全流程自动化。
+### 🤖 7个专业Agent
+- **Requester** - 需求分析师：澄清需求，评估可行性
+- **Product Manager** - 产品经理：规划功能，定义优先级
+- **Architect** - 架构师：设计系统架构，技术选型
+- **Developer** - 开发工程师：编写代码，实现功能
+- **Code Reviewer** - 代码审查员：审查代码质量
+- **Tester** - 测试工程师：编写测试，保证质量
+- **DevOps** - 运维工程师：部署上线，监控运维
 
-**系统已完成95%，具备生产部署条件！** 🚀
+### 🔧 Agent完全可配置
+- **工具（Tools）**：白名单/黑名单过滤
+- **技能（Skills）**：自定义技能集
+- **插件（Plugins）**：扩展Agent能力
+- **MCP服务器**：连接外部服务
 
-## ✨ 核心功能
+### 🔒 文件安全隔离
+- Agent只能访问项目workspace
+- 路径遍历攻击防护
+- 详细的错误信息
 
-### 🤖 7个AI Agent
-- **Requester** - 需求分析师
-- **ProductManager** - 产品经理  
-- **Architect** - 架构师
-- **Developer** - 开发工程师
-- **CodeReviewer** - 代码审查员
-- **Tester** - 测试工程师
-- **DevOps** - 运维工程师
-
-### 📦 19个已完成功能
-
-✅ 错误处理和容错 | ✅ 安全加固 | ✅ 并发控制 | ✅ 产物版本管理  
-✅ 性能监控 | ✅ 数据备份 | ✅ 成本优化 | ✅ 测试策略  
-✅ IM群聊系统 | ✅ 项目导入分析 | ✅ Agent能力扩展  
-✅ 用户体验优化 | ✅ 多语言支持 | ✅ Agent协作模式  
-✅ 对话归档 | ✅ 需求锚点检查 | ✅ 记忆冲突检测  
-✅ 跨项目协作 | ✅ MCP和Skill集成
+### 💾 智能记忆系统
+- 记忆保存在项目下，不跟随Agent
+- 同一个Agent在不同项目中有独立记忆
+- 支持短期/长期/工作记忆
 
 ## 🚀 快速开始
 
+### 1. 安装依赖
+
 ```bash
-# 1. 安装依赖
 pip install -r requirements.txt
-
-# 2. 配置环境
-cp .env.example .env
-
-# 3. 初始化数据库
-python -m src.database.migrations
-
-# 4. 启动服务
-python -m src.api.main
-
-# 5. 访问API文档
-# http://localhost:8000/docs
 ```
 
-## 📊 系统特点
+### 2. 创建用户
 
-- **完整性**: 19/20功能完成，250+ API接口，18,000+行代码
-- **企业级**: 多租户、RBAC、JWT、审计日志、配额管理
-- **智能化**: 三层记忆、经验回溯、需求锚点、冲突检测
-- **高可用**: 错误处理、熔断器、补偿机制、数据备份
-- **可扩展**: Agent动态扩展、MCP集成、工作流可配置
-- **协作性**: IM群聊、@提及、人工介入、跨项目协作
+```bash
+./mas user init --username alice --email alice@example.com
+```
+
+### 3. 注册Agent
+
+```bash
+# 从模板注册产品经理Agent
+./mas agent register --method template --name pm --template product_manager
+
+# 注册开发Agent（自定义配置）
+./mas agent register --method template --name dev --template developer \
+  --override tools.whitelist=file_operations,code_analysis
+```
+
+### 4. 创建项目
+
+```bash
+./mas project create --name todo-app --description "Todo应用开发项目"
+```
+
+### 5. 运行工作流（需要LLM API）
+
+```bash
+# 配置API密钥
+export CLAUDE_API_KEY=your_key
+
+# 运行工作流
+./mas workflow run --title "开发用户认证功能"
+```
 
 ## 📖 文档
 
-- [完整实现报告](COMPLETE_IMPLEMENTATION_REPORT.md) - 详细功能说明
-- [API文档](http://localhost:8000/docs) - 在线API文档
-- [架构设计](ARCHITECTURE.md) - 系统架构说明
+- **[快速入门](docs/QUICK_START.md)** - 5分钟上手指南
+- **[完整总结](docs/FINAL_SUMMARY.md)** - 系统完整介绍
+- **[架构设计](docs/ISOLATION_ARCHITECTURE.md)** - 三层隔离架构
+- **[记忆管理](docs/AGENT_MEMORY_DESIGN.md)** - Agent记忆和ID管理
 
-## 🎯 系统状态
+## 📊 系统状态
 
-- 核心功能: 100% ✅
-- 企业级特性: 100% ✅  
-- 高级功能: 95% ✅
-- 生产就绪: 100% ✅
-
-**系统已具备生产部署条件！** 🚀
+- ✅ **完成度**：100%
+- ✅ **用户层**：完全实现
+- ✅ **Agent层**：完全实现
+- ✅ **项目层**：完全实现
+- ✅ **文件安全**：完全实现
+- ✅ **记忆管理**：完全实现
 
 ---
 
-**这是一个功能完整、架构优秀、生产就绪的企业级AI开发协作平台！** 🎉
+**开始使用**：`./mas user init --username your_name`
+
+**详细文档**：[docs/QUICK_START.md](docs/QUICK_START.md)

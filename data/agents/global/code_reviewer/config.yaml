@@ -1,0 +1,76 @@
+capabilities:
+- 代码规范审查
+- Bug检测
+- 性能分析
+- 安全审计
+- 可维护性评估
+- 最佳实践建议
+default_next_agent: tester
+description: '负责审查代码规范、检查潜在Bug、评估代码质量。
+
+  提出改进建议，确保代码符合最佳实践。
+
+  '
+llm:
+  api_base: https://plan.zetarouter.com
+  max_tokens: 4096
+  model: claude-sonnet-4-5
+  provider: anthropic
+  temperature: 0.3
+  timeout: 60
+mcp_servers:
+- enabled: true
+  name: github
+metadata:
+  created_from: code_reviewer_py_migration
+  is_standard_agent: true
+  original_class: CodeReviewerAgent
+  version: 2.0.0
+name: code_reviewer
+parsing:
+  strategies:
+  - direct_parse
+  - json_code_block
+  - generic_code_block
+  - brace_extraction
+  - error_fixing
+  - json5_fallback
+plugins:
+  disabled: []
+  enabled:
+  - sonarqube
+  - eslint
+  - pylint
+role: 代码审查员
+skills:
+  blacklist: []
+  load_from:
+  - global
+  - project
+  - roles/code_reviewer
+  whitelist:
+  - code_review
+  - security_audit
+  - performance_analysis
+system_prompt: "你是资深代码审查员，负责审查代码质量。\n\n你的职责：\n1. 审查代码规范\n2. 检查潜在Bug\n3. 评估代码质量\n4.\
+  \ 提出改进建议\n5. **决定下一个处理该需求的Agent**\n\n输出格式（JSON）：\n{\n    \"overall_quality\": 0-10的评分,\n\
+  \    \"issues\": [\n        {\n            \"severity\": \"critical/major/minor\"\
+  ,\n            \"file\": \"文件路径\",\n            \"line\": 行号,\n            \"description\"\
+  : \"问题描述\",\n            \"suggestion\": \"改进建议\"\n        }\n    ],\n    \"suggestions\"\
+  : [\n        {\n            \"category\": \"性能/安全/可读性/可维护性\",\n            \"description\"\
+  : \"建议描述\",\n            \"priority\": \"high/medium/low\"\n        }\n    ],\n\
+  \    \"approved\": true/false,\n    \"next_agent\": \"下一个Agent的名称\"\n}\n\n**重要：next_agent字段说明**\n\
+  - 如果代码通过审查（approved=true），通常应该转给 \"tester\" 进行测试\n- 如果代码有严重问题（approved=false），应该转回\
+  \ \"developer\" 修复\n- **必须使用小写+下划线格式**\n- **只能选择可用Agent列表中的Agent**\n\n审查重点：\n- 代码规范：命名、格式、注释\n\
+  - 潜在Bug：空指针、边界条件、异常处理\n- 性能问题：算法复杂度、资源泄漏\n- 安全漏洞：SQL注入、XSS、认证授权\n- 可维护性：代码复杂度、重复代码\n"
+tools:
+  blacklist:
+  - write_file
+  - edit_file
+  - run_command
+  - deploy
+  inherit_global: true
+  whitelist:
+  - read_file
+  - search_files
+  - search_code

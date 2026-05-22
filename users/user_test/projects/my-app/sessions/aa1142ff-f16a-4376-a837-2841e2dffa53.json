@@ -1,0 +1,48 @@
+{
+  "session_id": "aa1142ff-f16a-4376-a837-2841e2dffa53",
+  "user_id": "user_test",
+  "project_name": "my-app",
+  "created_at": "2026-05-21T16:14:18.583139",
+  "updated_at": "2026-05-21T16:14:18.583147",
+  "status": "failed",
+  "metadata": {},
+  "tasks": {
+    "a6fa1f74-2426-439e-af35-df2c3579eb8f": {
+      "task_id": "a6fa1f74-2426-439e-af35-df2c3579eb8f",
+      "title": "实现用户登录功能",
+      "description": "需要支持邮箱密码登录，包含表单验证",
+      "status": "in_requirement",
+      "created_at": "2026-05-21T16:14:18.582876",
+      "updated_at": "2026-05-21T16:14:35.313001",
+      "current_agent": "requester",
+      "artifacts": [
+        {
+          "type": "requirement_analysis",
+          "content": {
+            "requirement_summary": "需要支持邮箱密码登录，包含表单验证",
+            "key_features": [],
+            "constraints": [],
+            "clarity_score": 5,
+            "completeness_score": 5,
+            "questions": [],
+            "feasibility": "需要进一步分析",
+            "recommendation": "建议产品经理进一步细化需求"
+          },
+          "agent": "requester",
+          "version": 1,
+          "timestamp": "2026-05-21T16:14:35.312989"
+        }
+      ],
+      "feedback": [],
+      "requirement_anchor": {
+        "core": "实现用户登录功能",
+        "detailed": "需要支持邮箱密码登录，包含表单验证",
+        "constraints": [],
+        "created_at": "2026-05-21T16:14:18.582880"
+      },
+      "iteration_count": {
+        "requester": 1
+      }
+    }
+  }
+}

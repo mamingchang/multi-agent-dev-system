@@ -1,0 +1,14 @@
+agents:
+- requester
+- my_data_analyst
+- my_ui_designer
+- developer
+created_at: '2026-05-21T14:47:16.478042'
+description: 象棋游戏
+owner: user_test
+project_id: my-app
+project_name: my-app
+settings: {}
+status: active
+tags: []
+updated_at: '2026-05-21T17:49:40.884436'

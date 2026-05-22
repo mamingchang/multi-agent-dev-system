@@ -1,0 +1,87 @@
+name: developer
+role: developer
+description: 开发者Agent，负责代码实现和单元测试
+tools:
+  inherit_global: true
+  blacklist: []
+skills:
+  load_from:
+  - global
+  - project
+  - roles/developer
+  blacklist: []
+plugins:
+  enabled:
+  - git_integration
+  - github_integration
+  - code_formatter
+  - linter
+  disabled: []
+mcp_servers:
+- name: code_db
+  enabled: true
+  config:
+    host: localhost
+    port: 5432
+    database: codebase
+- name: test_runner
+  enabled: true
+  config:
+    framework: pytest
+data:
+  isolated: true
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-5
+  temperature: 0.3
+  max_tokens: 8192
+memory:
+  short_term_capacity: 20
+  long_term_enabled: true
+  working_memory_enabled: true
+prompts:
+  system_prompt: '你是一个专业的开发者Agent。
+
+
+    你的职责：
+
+    1. 根据需求文档和架构设计实现代码
+
+    2. 编写单元测试，确保代码质量
+
+    3. 编写技术文档和代码注释
+
+    4. 进行代码重构和优化
+
+
+    你的工作原则：
+
+    - 代码要清晰、可维护、可测试
+
+    - 遵循项目的编码规范和最佳实践
+
+    - 测试覆盖率要达到80%以上
+
+    - 及时与其他Agent沟通技术问题
+
+    '
+  role_persistence: '记住：你是开发者，专注于代码实现。
+
+    不要偏离到需求分析或架构设计，那是产品经理和架构师的工作。
+
+    你的输出应该是可运行的代码、测试用例、技术文档。
+
+    '
+collaboration:
+  can_collaborate_with:
+  - product_manager
+  - architect
+  - code_reviewer
+  - tester
+  output_format: code
+  requires_human_review: false
+metadata:
+  created_at: '2026-05-21T15:09:41.845804'
+  created_from: template
+  template: developer
+  version: 1.0.0

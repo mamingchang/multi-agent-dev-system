@@ -15,6 +15,26 @@ from typing import Dict, Any, Optional
 import os
 
 
+class LLMResponse:
+    """
+    LLM响应包装类
+
+    统一不同LLM的响应格式
+    """
+    def __init__(self, content: str, usage: Dict[str, int] = None, model: str = None):
+        """
+        初始化响应对象
+
+        Args:
+            content: 响应文本内容
+            usage: token使用情况 {'prompt_tokens': int, 'completion_tokens': int, 'total_tokens': int}
+            model: 使用的模型名称
+        """
+        self.content = content
+        self.usage = usage or {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0}
+        self.model = model or 'unknown'
+
+
 class LLMAdapter(ABC):
     """LLM适配器基类"""
 
@@ -140,6 +160,7 @@ class ClaudeLLMAdapter(LLMAdapter):
         self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN")
         self.model = model
         self.base_url = base_url or os.getenv("ANTHROPIC_BASE_URL")
+        self.last_usage = None  # 存储最后一次调用的usage信息
 
         if not self.api_key:
             raise ValueError("未设置ANTHROPIC_API_KEY或ANTHROPIC_AUTH_TOKEN环境变量")
@@ -192,6 +213,9 @@ class ClaudeLLMAdapter(LLMAdapter):
 
                 if response.status_code == 200:
                     result = response.json()
+                    # 保存usage信息
+                    if 'usage' in result:
+                        self.last_usage = result['usage']
                     return result['content'][0]['text']
                 else:
                     raise RuntimeError(f"API返回错误: {response.status_code} - {response.text}")
@@ -215,6 +239,47 @@ class ClaudeLLMAdapter(LLMAdapter):
             error_detail = traceback.format_exc()
             print(f"\n[Claude API错误详情]\n{error_detail}")
             raise RuntimeError(f"Claude API调用失败: {str(e)}")
+
+    def call(self, prompt=None, system_prompt=None, user=None, system=None, **kwargs) -> LLMResponse:
+        """
+        兼容多种参数名称的call方法
+
+        支持的参数组合：
+        1. call(prompt=..., system_prompt=...)  # Agent使用的方式
+        2. call(system=..., user=...)           # 标准方式
+
+        Args:
+            prompt: 用户提示词（Agent使用的参数名）
+            system_prompt: 系统提示词（Agent使用的参数名）
+            user: 用户提示词（标准参数名）
+            system: 系统提示词（标准参数名）
+            **kwargs: 其他参数
+
+        Returns:
+            LLMResponse: 包含content和usage的响应对象
+        """
+        # 兼容不同的参数名
+        system_text = system_prompt or system or ""
+        user_text = prompt or user or ""
+
+        # 调用chat方法获取响应文本
+        content = self.chat(system_text, user_text, **kwargs)
+
+        # 包装成LLMResponse对象，使用保存的usage信息
+        usage = self.last_usage or {
+            'input_tokens': 0,
+            'output_tokens': 0
+        }
+
+        return LLMResponse(
+            content=content,
+            usage={
+                'prompt_tokens': usage.get('input_tokens', 0),
+                'completion_tokens': usage.get('output_tokens', 0),
+                'total_tokens': usage.get('input_tokens', 0) + usage.get('output_tokens', 0)
+            },
+            model=self.model
+        )
 
 
 class OpenAILLMAdapter(LLMAdapter):
